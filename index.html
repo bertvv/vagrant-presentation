@@ -63,6 +63,14 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li>Vagrant version 1.5.1</li>
 <li>VirtualBox 4.3</li>
 </ul>
+<pre><code>$ vagrant --version
+Vagrant 1.5.1
+$ VBoxHeadless --version
+Oracle VM VirtualBox Headless Interface 4.3.10
+(C) 2008-2014 Oracle Corporation
+All rights reserved.
+
+4.3.10r93012</code></pre>
 </section></section>
 <section><section id="getting-up-and-running" class="titleslide slide level1"><h1>Getting up and running</h1></section><section id="minimal-default-setup" class="slide level2">
 <h1>Minimal default setup:</h1>
@@ -72,6 +80,58 @@ $ <span class="kw">vagrant</span> up</code></pre>
 </section><section id="what-happens-under-the-hood" class="slide level2">
 <h1>What happens under the hood?</h1>
 <pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> init hashicorp/precise32</code></pre>
+<p>A <em>Vagrantfile</em> is created</p>
+</section><section id="what-happens-under-the-hood-1" class="slide level2">
+<h1>What happens under the hood?</h1>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> up
+<span class="kw">Bringing</span> machine <span class="st">&#39;default&#39;</span> up with <span class="st">&#39;virtualbox&#39;</span> provider...
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Box <span class="st">&#39;hashicorp/precise32&#39;</span> could not be found. Attempting to find and install...
+    <span class="kw">default</span>: Box Provider: virtualbox
+    <span class="kw">default</span>: Box Version: <span class="kw">&gt;</span>= 0
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Loading metadata for box <span class="st">&#39;hashicorp/precise32&#39;</span>
+    <span class="kw">default</span>: URL: https://vagrantcloud.com/hashicorp/precise32
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Adding box <span class="st">&#39;hashicorp/precise32&#39;</span> (v1.0.0) <span class="kw">for</span> <span class="kw">provider</span>: virtualbox
+    <span class="kw">default</span>: Downloading: https://vagrantcloud.com/hashicorp/precise32/version/1/provider/virtualbox.box
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Successfully added box <span class="st">&#39;hashicorp/precise32&#39;</span> (v1.0.0) <span class="kw">for</span> <span class="st">&#39;virtualbox&#39;</span>!
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Importing base box <span class="st">&#39;hashicorp/precise32&#39;</span>...
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Matching MAC address for NAT networking...
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Checking if box <span class="st">&#39;hashicorp/precise32&#39;</span> is up to date...
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Setting the name of the VM: example_default_1395996714768_3176
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Clearing any previously set network interfaces...
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Preparing network interfaces based on configuration...
+    <span class="kw">default</span>: Adapter 1: nat
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Forwarding ports...
+    <span class="kw">default</span>: 22 =<span class="kw">&gt;</span> 2222 (adapter 1)</code></pre>
+</section><section class="slide level2">
+
+<pre class="sourceCode bash"><code class="sourceCode bash">==<span class="kw">&gt;</span> <span class="kw">default</span>: Booting VM...
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Waiting for machine to boot. This may take a few minutes...
+    <span class="kw">default</span>: SSH address: 127.0.0.1:2222
+    <span class="kw">default</span>: SSH username: vagrant
+    <span class="kw">default</span>: SSH auth method: private key
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Machine booted and ready!
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Checking for guest additions in VM...
+    <span class="kw">default</span>: The guest additions on this VM do not match the installed version of
+    <span class="kw">default</span>: VirtualBox! In most cases this is fine, but in rare cases it can
+    <span class="kw">default</span>: prevent things such as shared folders from working properly. If you see
+    <span class="kw">default</span>: shared folder errors, please make sure the guest additions within the
+    <span class="kw">default</span>: virtual machine match the version of VirtualBox you have installed on
+    <span class="kw">default</span>: your host and reload your VM.
+    <span class="kw">default</span>: 
+    <span class="kw">default</span>: Guest Additions Version: 4.2.0
+    <span class="kw">default</span>: VirtualBox Version: 4.3
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Mounting shared folders...
+    <span class="kw">default</span>: /vagrant =<span class="kw">&gt;</span> /home/bert/CfgMgmt/vagrant-example</code></pre>
+</section><section id="done" class="slide level2">
+<h1>Done!</h1>
+<p>You now have a working VM, ready for use:</p>
+<pre><code>$ vagrant ssh
+Welcome to Ubuntu 12.04 LTS (GNU/Linux 3.2.0-23-generic-pae i686)
+
+ * Documentation:  https://help.ubuntu.com/
+Welcome to your Vagrant-built virtual machine.
+Last login: Fri Sep 14 06:22:31 2012 from 10.0.2.2
+vagrant@precise32:~$ </code></pre>
 </section></section>
 <section><section id="configuring-vagrant-boxes" class="titleslide slide level1"><h1>Configuring vagrant boxes</h1></section><section id="vagrantfile" class="slide level2">
 <h1>Vagrantfile</h1>
