@@ -50,6 +50,9 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <p><em>Bert Van Vreckem</em></p>
 <p>Lecturer ICT at University College Ghent</p>
 </section>
+<section id="have-a-questionremark-please-interrupt-me" class="slide level2">
+<h1>Have a question/remark? Please interrupt me!</h1>
+</section>
 <section id="agenda" class="slide level2">
 <h1>Agenda</h1>
 </section>
@@ -61,22 +64,28 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <h1>Assumptions</h1>
 <ul>
 <li>Vagrant version 1.5.1</li>
-<li>VirtualBox 4.3</li>
+<li>VirtualBox 4.3.10
+<ul>
+<li>default Host-only network (192.168.56.0/24)</li>
+</ul></li>
 </ul>
-<pre><code>$ vagrant --version
+<pre class="shell-session"><code>$ vagrant --version
 Vagrant 1.5.1
 $ VBoxHeadless --version
 Oracle VM VirtualBox Headless Interface 4.3.10
 (C) 2008-2014 Oracle Corporation
 All rights reserved.
 
-4.3.10r93012</code></pre>
+4.3.10r93012
+$ ifconfig vboxnet0
+=&gt; 192.168.56.1</code></pre>
 </section></section>
 <section><section id="getting-up-and-running" class="titleslide slide level1"><h1>Getting up and running</h1></section><section id="minimal-default-setup" class="slide level2">
 <h1>Minimal default setup:</h1>
 <pre class="sourceCode bash"><code class="sourceCode bash">
 $ <span class="kw">vagrant</span> init hashicorp/precise32
-$ <span class="kw">vagrant</span> up</code></pre>
+$ <span class="kw">vagrant</span> up
+$ <span class="kw">vagrant</span> ssh</code></pre>
 </section><section id="what-happens-under-the-hood" class="slide level2">
 <h1>What happens under the hood?</h1>
 <pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> init hashicorp/precise32</code></pre>
@@ -133,13 +142,145 @@ Welcome to your Vagrant-built virtual machine.
 Last login: Fri Sep 14 06:22:31 2012 from 10.0.2.2
 vagrant@precise32:~$ </code></pre>
 </section></section>
-<section><section id="configuring-vagrant-boxes" class="titleslide slide level1"><h1>Configuring vagrant boxes</h1></section><section id="vagrantfile" class="slide level2">
+<section><section id="lets-build-a-centos-lamp-stack" class="titleslide slide level1"><h1>Let's build a CentOS LAMP stack!</h1></section></section>
+<section><section id="configuring-vagrant-boxes" class="titleslide slide level1"><h1>Configuring Vagrant boxes</h1></section><section id="vagrantfile" class="slide level2">
 <h1>Vagrantfile</h1>
+<p>Minimal Vagrantfile:</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="dt">VAGRANTFILE_API_VERSION</span> = <span class="st">&#39;2&#39;</span>
+
+<span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
+  config.vm.box = <span class="st">&#39;hashicorp/precise32&#39;</span>
+<span class="kw">end</span></code></pre>
+<p>This is Ubuntu 12.04 LTS 32 bit,</p>
+<p>we want CentOS 6.5 64 bit</p>
+</section><section id="finding-base-boxes" class="slide level2">
+<h1>Finding base boxes</h1>
+<ul>
+<li><a href="https://vagrantcloud.com/">https://vagrantcloud.com/</a> (since 1.5)</li>
+<li><a href="http://vagrantbox.es/">http://vagrantbox.es/</a> (pre-1.5 boxes)</li>
+</ul>
+</section><section id="using-another-base-box" class="slide level2">
+<h1>Using another base box</h1>
+<p>From the command line (Vagrant cloud):</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> init alphainternational/centos-6.5-x64</code></pre>
+<div class="fragment">
+<p>From the command line (&quot;old&quot; style):</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> box add --name centos65 \
+  <span class="kw">http</span>://packages.vstone.eu/vagrant-boxes/centos-6.x-64bit-latest.box
+$ <span class="kw">vagrant</span> init centos65</code></pre>
+</div>
+<div class="fragment">
+<p>In your Vagrantfile (only applies to &quot;old&quot; style):</p>
 <pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="dt">VAGRANTFILE_API_VERSION</span> = <span class="st">&#39;2&#39;</span>
 
 <span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
   config.vm.box = <span class="st">&#39;centos65&#39;</span>
+  config.vm.box_url =
+    <span class="st">&#39;http://packages.vstone.eu/vagrant-boxes/centos-6.x-64bit-latest.box&#39;</span>
 <span class="kw">end</span></code></pre>
+</div>
+</section><section id="applying-the-change" class="slide level2">
+<h1>Applying the change</h1>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> destroy
+    <span class="kw">default</span>: Are you sure you want to destroy the <span class="st">&#39;default&#39;</span> VM? [y/N] y
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Forcing shutdown of VM...
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Destroying VM and associated drives...
+$ <span class="kw">vagrant</span> up
+[<span class="kw">...</span>]
+$ <span class="kw">vagrant</span> ssh</code></pre>
+</section><section id="configuring-the-vm" class="slide level2">
+<h1>Configuring the VM</h1>
+<table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="sourceCode"><pre><code class="sourceCode ruby"><span class="dt">VAGRANTFILE_API_VERSION</span> = <span class="st">&#39;2&#39;</span>
+
+<span class="dt">HOST_NAME</span> = <span class="st">&#39;box001&#39;</span>
+
+<span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
+
+  config.vm.hostname = <span class="dt">HOST_NAME</span>
+  config.vm.box = <span class="st">&#39;alphainternational/centos-6.5-x64&#39;</span>
+  config.vm.network <span class="st">:private_network</span>,
+    ip: <span class="st">&#39;192.168.56.65&#39;</span>,
+    netmask: <span class="st">&#39;255.255.255.0&#39;</span>
+
+  config.vm.provider <span class="st">:virtualbox</span> <span class="kw">do</span> |vb|
+    vb.name = <span class="dt">HOST_NAME</span>
+  <span class="kw">end</span>
+<span class="kw">end</span></code></pre></td></tr></table>
+<p>For more info,</p>
+<ul>
+<li>see the docs at <a href="https://docs.vagrantup.com/">https://docs.vagrantup.com/</a></li>
+<li>or the default <code>Vagrantfile</code></li>
+</ul>
+</section><section id="applying-changes" class="slide level2">
+<h1>Applying changes</h1>
+<p>When you change the <code>Vagrantfile</code>, do:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> reload</code></pre>
+<p>Or, if the change is profound:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> destroy -f
+$ <span class="kw">vagrant</span> up</code></pre>
+</section><section id="summary" class="slide level2">
+<h1>Summary</h1>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> init user/box   <span class="co"># Create Vagrantfile for specified base box</span>
+$ <span class="kw">vim</span> Vagrantfile         <span class="co"># Customize your box</span>
+$ <span class="kw">vagrant</span> up              <span class="co"># Create VM and boot it</span>
+$ <span class="kw">vagrant</span> reload          <span class="co"># After every change to Vagrantfile</span>
+$ <span class="kw">vagrant</span> destroy         <span class="co"># Clean up!</span></code></pre>
+</section></section>
+<section><section id="provisioning" class="titleslide slide level1"><h1>Provisioning</h1></section><section id="provisioning-1" class="slide level2">
+<h1>Provisioning</h1>
+<p>= From <em>Just Enough Operating System</em> to fully functional configured box</p>
+<ul>
+<li><strong>Shell script</strong></li>
+<li><strong>Ansible</strong></li>
+<li><strong>Puppet</strong> (Apply + Agent)</li>
+<li>Chef (Solo + Client)</li>
+<li>Docker</li>
+<li>Salt</li>
+</ul>
+</section><section id="shell-provisioning" class="slide level2">
+<h1>Shell provisioning</h1>
+<p>Add to your Vagrantfile</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby">config.vm.provision <span class="st">&#39;shell&#39;</span>, path: <span class="st">&#39;provision.sh&#39;</span></code></pre>
+<p>Put the script into the same folder as <code>Vagrantfile</code></p>
+</section><section id="recommended-workflow" class="slide level2">
+<h1>Recommended workflow</h1>
+<ul>
+<li>First do the installation manually (<code>vagrant ssh</code>)</li>
+<li>Make sure every command runs without user interaction!</li>
+<li>Record every command in the script</li>
+<li>If everything works: <code>vagrant destroy -f &amp;&amp; vagrant up</code></li>
+</ul>
+</section><section id="provisioning-script" class="slide level2">
+<h1>Provisioning script</h1>
+<p>Installs Apache and PHP</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/usr/bin/env bash -eu</span>
+<span class="co"># provision.sh -- Install Apache and a test PHP script</span>
+
+<span class="kw">sudo</span> rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+<span class="kw">yum</span> install -y httpd php
+
+<span class="kw">service</span> httpd start
+<span class="kw">chkconfig</span> httpd on
+
+<span class="kw">cat</span> <span class="kw">&gt;</span> /var/www/html/index.php &lt;&lt; EOF
+&lt;?<span class="kw">php</span> phpinfo(); <span class="kw">?&gt;</span>
+EOF</code></pre>
 </section></section>
     </div>
   </div>
