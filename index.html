@@ -269,7 +269,7 @@ $ <span class="kw">vagrant</span> destroy         <span class="co"># Clean up!</
 </section><section id="provisioning-script" class="slide level2">
 <h1>Provisioning script</h1>
 <p>Installs Apache and PHP</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/usr/bin/env bash -eu</span>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash -eu</span>
 <span class="co"># provision.sh -- Install Apache and a test PHP script</span>
 
 <span class="kw">sudo</span> rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
@@ -281,6 +281,37 @@ $ <span class="kw">vagrant</span> destroy         <span class="co"># Clean up!</
 <span class="kw">cat</span> <span class="kw">&gt;</span> /var/www/html/index.php &lt;&lt; EOF
 &lt;?<span class="kw">php</span> phpinfo(); <span class="kw">?&gt;</span>
 EOF</code></pre>
+</section><section id="synced-folders" class="slide level2">
+<h1>Synced folders</h1>
+<ul>
+<li><p>Add to your <code>Vagrantfile</code>:</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby">config.vm.synced_folder <span class="st">&#39;html&#39;</span>, <span class="st">&#39;/var/www/html&#39;</span></code></pre></li>
+<li><p>Create folder <code>html</code> in your project root</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">tree</span>
+<span class="kw">.</span>
+<span class="kw">|--</span> html
+<span class="kw">|</span>   <span class="kw">`--</span> index.php
+<span class="kw">|--</span> provision.sh
+<span class="kw">`--</span> Vagrantfile</code></pre></li>
+<li><p><code>Vagrant reload</code></p></li>
+</ul>
+</section><section id="disadvantages-of-shell-provisioning" class="slide level2">
+<h1>Disadvantages of shell provisioning</h1>
+<ul>
+<li class="fragment">Not very flexible
+<ul>
+<li class="fragment">Script should be non-interactive</li>
+</ul></li>
+<li class="fragment">Not scalable
+<ul>
+<li class="fragment">Long Bash scripts are horrible!</li>
+</ul></li>
+<li class="fragment"><em>Idempotence</em> not guaranteed
+<ul>
+<li class="fragment">What happens when you run provision script multiple times?</li>
+<li class="fragment">Change to script is expensive: <code>vagrant destroy &amp;&amp; vagrant up</code></li>
+</ul></li>
+</ul>
 </section></section>
     </div>
   </div>

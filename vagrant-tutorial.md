@@ -287,4 +287,35 @@ cat > /var/www/html/index.php << EOF
 EOF
 ```
 
+## Synced folders
+
+* Add to your `Vagrantfile`:
+
+    ```ruby
+    config.vm.synced_folder 'html', '/var/www/html'
+    ```
+
+* Create folder `html` in your project root
+
+    ```bash
+    $ tree
+    .
+    |-- html
+    |   `-- index.php
+    |-- provision.sh
+    `-- Vagrantfile
+    ```
+
+* `Vagrant reload`
+
+## Disadvantages of shell provisioning
+
+> * Not very flexible
+>     * Script should be non-interactive
+> * Not scalable
+>     * Long Bash scripts are horrible!
+> * *Idempotence* not guaranteed
+>     * What happens when you run provision script multiple times?
+>     * Change to script is expensive: `vagrant destroy && vagrant up`
+
 
