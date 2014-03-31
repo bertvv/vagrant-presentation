@@ -69,7 +69,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li>default Host-only network (192.168.56.0/24)</li>
 </ul></li>
 </ul>
-<pre class="shell-session"><code>$ vagrant --version
+<pre class="console"><code>$ vagrant --version
 Vagrant 1.5.1
 $ VBoxHeadless --version
 Oracle VM VirtualBox Headless Interface 4.3.10
@@ -82,8 +82,7 @@ $ ifconfig vboxnet0
 </section></section>
 <section><section id="getting-up-and-running" class="titleslide slide level1"><h1>Getting up and running</h1></section><section id="minimal-default-setup" class="slide level2">
 <h1>Minimal default setup:</h1>
-<pre class="sourceCode bash"><code class="sourceCode bash">
-$ <span class="kw">vagrant</span> init hashicorp/precise32
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> init hashicorp/precise32
 $ <span class="kw">vagrant</span> up
 $ <span class="kw">vagrant</span> ssh</code></pre>
 </section><section id="what-happens-under-the-hood" class="slide level2">
@@ -145,7 +144,7 @@ vagrant@precise32:~$ </code></pre>
 <section><section id="lets-build-a-centos-lamp-stack" class="titleslide slide level1"><h1>Let's build a CentOS LAMP stack!</h1></section></section>
 <section><section id="configuring-vagrant-boxes" class="titleslide slide level1"><h1>Configuring Vagrant boxes</h1></section><section id="vagrantfile" class="slide level2">
 <h1>Vagrantfile</h1>
-<p>Minimal Vagrantfile:</p>
+<p>Minimal Vagrantfile<a href="#/fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>:</p>
 <pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="dt">VAGRANTFILE_API_VERSION</span> = <span class="st">&#39;2&#39;</span>
 
 <span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
@@ -206,6 +205,7 @@ $ <span class="kw">vagrant</span> ssh</code></pre>
 14
 15
 16
+17
 </pre></td><td class="sourceCode"><pre><code class="sourceCode ruby"><span class="dt">VAGRANTFILE_API_VERSION</span> = <span class="st">&#39;2&#39;</span>
 
 <span class="dt">HOST_NAME</span> = <span class="st">&#39;box001&#39;</span>
@@ -220,6 +220,7 @@ $ <span class="kw">vagrant</span> ssh</code></pre>
 
   config.vm.provider <span class="st">:virtualbox</span> <span class="kw">do</span> |vb|
     vb.name = <span class="dt">HOST_NAME</span>
+    vb.customize [<span class="st">&#39;modifyvm&#39;</span>, <span class="st">:id</span>, <span class="st">&#39;--memory&#39;</span>, <span class="dv">256</span>]
   <span class="kw">end</span>
 <span class="kw">end</span></code></pre></td></tr></table>
 <p>For more info,</p>
@@ -347,6 +348,7 @@ $ <span class="kw">vagrant</span> ssh box001</code></pre>
 $ <span class="kw">vim</span> Vagrantfile         <span class="co"># Customize your box</span>
 $ <span class="kw">vagrant</span> up [host]       <span class="co"># Create VM(s) if needed and boot</span>
 $ <span class="kw">vagrant</span> reload [host]   <span class="co"># After every change to Vagrantfile</span>
+$ <span class="kw">vagrant</span> halt [host]     <span class="co"># Poweroff</span>
 $ <span class="kw">vagrant</span> destroy [host]  <span class="co"># Clean up!</span>
 $ <span class="kw">vagrant</span> ssh [host]      <span class="co"># log in</span>
 $ <span class="kw">vagrant</span> status [host]   <span class="co"># Status of your VM(s)</span></code></pre>
@@ -409,10 +411,8 @@ EOF</code></pre>
 </section><section id="disadvantages-of-shell-provisioning" class="slide level2">
 <h1>Disadvantages of shell provisioning</h1>
 <ul>
-<li class="fragment">Not very flexible
-<ul>
+<li class="fragment">Not very flexible</li>
 <li class="fragment">Script should be non-interactive</li>
-</ul></li>
 <li class="fragment">Not scalable
 <ul>
 <li class="fragment">Long Bash scripts are horrible!</li>
@@ -426,13 +426,18 @@ EOF</code></pre>
 </section></section>
 <section><section id="provisioning-with-ansible" class="titleslide slide level1"><h1>Provisioning with Ansible</h1></section><section id="ansible" class="slide level2">
 <h1>Ansible</h1>
+<p><a href="http://ansible.com/">http://ansible.com/</a></p>
 <ul>
 <li>Provisioning tool written in Python</li>
 <li>Simple configuration (YAML)</li>
 <li>No agent necessary (but recommended for large setups)</li>
+<li>Idempotent</li>
 </ul>
-</section><section id="vagrantfile-1" class="slide level2">
-<h1>Vagrantfile</h1>
+<div class="fragment">
+<p>(of course, you know this, you went to the talks yesterday...)</p>
+</div>
+</section><section id="vagrant-configuration" class="slide level2">
+<h1>Vagrant configuration</h1>
 <pre class="sourceCode ruby"><code class="sourceCode ruby">config.vm.define <span class="st">&#39;box001&#39;</span> <span class="kw">do</span> |node|
   [...]
   node.vm.provisioning <span class="st">&#39;ansible&#39;</span> <span class="kw">do</span> |ansible|
@@ -450,31 +455,364 @@ EOF</code></pre>
 <li>See <a href="http://docs.ansible.com/playbooks_best_practices.html">Ansible best practices</a></li>
 </ul></li>
 </ul>
+</section><section id="lets-build-a-lamp-stack" class="slide level2">
+<h1>Let's build a LAMP stack!</h1>
+<p>First, on one box</p>
+<p>Then, database on a separate machine</p>
+</section><section id="vagrantfile-1" class="slide level2">
+<h1>Vagrantfile</h1>
+<table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+</pre></td><td class="sourceCode"><pre><code class="sourceCode ruby"><span class="dt">VAGRANTFILE_API_VERSION</span> = <span class="st">&#39;2&#39;</span>
+hosts = [ { name: <span class="st">&#39;box001&#39;</span>, ip: <span class="st">&#39;192.168.56.65&#39;</span> },
+          { name: <span class="st">&#39;box002&#39;</span>, ip: <span class="st">&#39;192.168.56.66&#39;</span> } ]
+
+<span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
+  config.vm.box = <span class="st">&#39;alphainternational/centos-6.5-x64&#39;</span>
+  hosts.each <span class="kw">do</span> |host|
+    config.vm.define host[<span class="st">:name</span>] <span class="kw">do</span> |node|
+      node.vm.hostname = host[<span class="st">:name</span>]
+      node.vm.network <span class="st">:private_network</span>,
+        ip: host[<span class="st">:ip</span>],
+        netmask: <span class="st">&#39;255.255.255.0&#39;</span>
+      node.vm.synced_folder <span class="st">&#39;html&#39;</span>, <span class="st">&#39;/var/www/html&#39;</span>
+
+      node.vm.provider <span class="st">:virtualbox</span> <span class="kw">do</span> |vb|
+        vb.name = host[<span class="st">:name</span>]
+      <span class="kw">end</span>
+
+      node.vm.provision <span class="st">&#39;ansible&#39;</span> <span class="kw">do</span> |ansible|
+        ansible.playbook = <span class="st">&#39;ansible/site.yml&#39;</span>
+      <span class="kw">end</span>
+    <span class="kw">end</span>
+  <span class="kw">end</span>
+<span class="kw">end</span></code></pre></td></tr></table>
 </section><section id="ansible-project-structure" class="slide level2">
 <h1>Ansible project structure</h1>
-<pre><code>$ tree
-.
-|-- ansible
-|   |-- host_vars
-|   |   `-- box001
-|   |-- roles
-|   |   |-- apache
-|   |   |   `-- handlers
-|   |   |       `-- main.yml
-|   |   |   `-- tasks
-|   |   |       `-- main.yml
-|   |   |-- common
-|   |   |   `-- tasks
-|   |   |       `-- main.yml
-|   |   `-- db
-|   |       `-- tasks
-|   |   |       `-- main.yml
-|   `-- site.yml
-|-- html
-|   `-- index.php
-`-- Vagrantfile
-</code></pre>
+<pre><code>$ tree ansible/
+ansible/
+|-- group_vars
+|   `-- all
+|-- roles
+|   |-- common
+|   |   `-- tasks
+|   |       `-- main.yml
+|   |-- db
+|   |   `-- tasks
+|   |       `-- main.yml
+|   `-- web
+|       `-- tasks
+|           `-- main.yml
+`-- site.yml</code></pre>
+</section><section id="main-ansible-config-file-site.yml" class="slide level2">
+<h1>Main Ansible config file: <code>site.yml</code></h1>
+<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
+<span class="kw">-</span> <span class="fu">hosts:</span> box001
+  <span class="fu">sudo:</span> true
+  <span class="fu">roles:</span>
+    <span class="kw">-</span> common
+    <span class="kw">-</span> web
+    <span class="kw">-</span> db</code></pre>
+</section><section id="common-role" class="slide level2">
+<h1><em>Common</em> role</h1>
+<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
+<span class="co"># file common/tasks/main.yml</span>
+<span class="kw">-</span> <span class="fu">name:</span> Install base packages
+  <span class="fu">yum:</span> pkg={{item}} state=installed
+  <span class="fu">with_items:</span>
+    <span class="kw">-</span> libselinux-python</code></pre>
+</section><section id="web-role" class="slide level2">
+<h1><em>Web</em> role</h1>
+<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
+<span class="co"># file web/tasks/main.yml</span>
+<span class="kw">-</span> <span class="fu">name:</span> Install Apache
+  <span class="fu">yum:</span> pkg={{item}} state=installed
+  <span class="fu">with_items:</span>
+    <span class="kw">-</span> httpd
+    <span class="kw">-</span> php
+    <span class="kw">-</span> php-xml
+    <span class="kw">-</span> php-mysql
+
+<span class="kw">-</span> <span class="fu">name:</span> Start Apache service
+  <span class="fu">service:</span> name=httpd state=running enabled=yes</code></pre>
+</section><section id="db-role" class="slide level2">
+<h1><em>Db</em> role</h1>
+<table class="sourceCode yaml numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+</pre></td><td class="sourceCode"><pre><code class="sourceCode yaml"><span class="ot">---</span>
+<span class="co"># file db/tasks/main.yml</span>
+<span class="kw">-</span> <span class="fu">name:</span> Install MySQL
+  <span class="fu">yum:</span> pkg={{item}} state=installed
+  <span class="fu">with_items:</span>
+    <span class="kw">-</span> mysql
+    <span class="kw">-</span> mysql-server
+    <span class="kw">-</span> MySQL-python
+
+<span class="kw">-</span> <span class="fu">name:</span> Start MySQL service
+  <span class="fu">service:</span> name=mysqld state=running enabled=yes
+
+<span class="kw">-</span> <span class="fu">name:</span> Create application database
+  <span class="fu">mysql_db:</span> name={{ dbname }} state=present
+
+<span class="kw">-</span> <span class="fu">name:</span> Create application database user
+  <span class="fu">mysql_user:</span> name={{ dbuser }} password={{ dbpasswd }}
+                <span class="fu">priv=*.*:</span>ALL host=&#39;localhost&#39; state=present</code></pre></td></tr></table>
+</section><section id="variables" class="slide level2">
+<h1>Variables</h1>
+<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
+<span class="co"># file group_vars/all</span>
+
+<span class="co"># Application database</span>
+<span class="fu">dbname:</span> appdb
+<span class="fu">dbuser:</span> appusr
+<span class="fu">dbpasswd:</span> CaxWeikun6</code></pre>
+</section><section id="install-a-webapp" class="slide level2">
+<h1>Install a webapp</h1>
+<p>E.g. <a href="http://www.mediawiki.org/wiki/Download">Mediawiki</a></p>
+<ol type="1">
+<li>Unpack latest mediawiki.tar.gz into <code>html/wiki/</code> directory</li>
+<li>Surf to <a href="http://192.168.56.65/wiki">http://192.168.56.65/wiki</a> and follow instructions</li>
+<li>Enter values from <code>group_vars/all</code> in the install page</li>
+<li>Download <code>LocalSite.php</code> and save in <code>html/wiki/</code></li>
+</ol>
+<p>Automating Mediawiki installation is left as an exercise to the reader... ;-)</p>
+</section><section id="how-to-use-this-for-production" class="slide level2">
+<h1>How to use this for production</h1>
+<p>Inventory file, automatically created by Vagrant:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">cat</span> .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
+<span class="co"># Generated by Vagrant</span>
+
+<span class="kw">box001</span> ansible_ssh_host=127.0.0.1 ansible_ssh_port=2222
+<span class="kw">box002</span> ansible_ssh_host=127.0.0.1 ansible_ssh_port=2200</code></pre>
+<p>In production, just use a different inventory file!</p>
+</section><section id="move-database-to-another-box" class="slide level2">
+<h1>Move database to another box</h1>
+<p>What should change?</p>
+<div class="fragment">
+<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
+<span class="co"># file site.yml</span>
+<span class="kw">-</span> <span class="fu">hosts:</span> box001
+  <span class="fu">sudo:</span> true
+  <span class="fu">roles:</span>
+    <span class="kw">-</span> common
+    <span class="kw">-</span> web
+
+<span class="kw">-</span> <span class="fu">hosts:</span> box002
+  <span class="fu">sudo:</span> true
+  <span class="fu">roles:</span>
+    <span class="kw">-</span> common
+    <span class="kw">-</span> db</code></pre>
+</div>
+</section><section id="move-database-to-another-box-contd" class="slide level2">
+<h1>Move database to another box (cont'd)</h1>
+<p>What should change?</p>
+<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
+<span class="co"># db/tasks/main.yml</span>
+<span class="kw">[</span>...<span class="kw">]</span>
+<span class="kw">-</span> <span class="fu">name:</span> Create application database user
+  <span class="fu">mysql_user:</span> name={{ dbuser }} password={{ dbpasswd }}
+                <span class="fu">priv=*.*:</span>ALL host=&#39;%&#39; state=present</code></pre>
+<p>This should be easy to automate</p>
 </section></section>
+<section><section id="provisioning-with-puppet" class="titleslide slide level1"><h1>Provisioning with Puppet</h1></section><section id="puppet" class="slide level2">
+<h1>Puppet</h1>
+<p><a href="http://puppetlabs.com/">http://puppetlabs.com/</a></p>
+<ul>
+<li>One of the market leaders in configuration management</li>
+<li>Has its own configuration language</li>
+<li>Many reusable modules available</li>
+<li>Needs an agent on hosts under control</li>
+<li>Usually set up with a central server (puppet master)</li>
+<li>Puppet should be already on your base box!</li>
+</ul>
+<div class="fragment">
+<p>Do I have to introduce Puppet at all?</p>
+</div>
+</section><section id="vagrant-configuration-1" class="slide level2">
+<h1>Vagrant configuration</h1>
+<pre class="sourceCode ruby"><code class="sourceCode ruby">config.vm.define <span class="dt">HOST_NAME</span> <span class="kw">do</span> |node|
+  node.vm.synced_folder <span class="st">&#39;puppet&#39;</span>, <span class="st">&#39;/etc/puppet&#39;</span>
+  node.vm.provision <span class="st">&#39;puppet&#39;</span> <span class="kw">do</span> |puppet|
+    puppet.manifests_path = <span class="st">&#39;puppet/manifests&#39;</span>
+    puppet.manifest_file = <span class="st">&#39;site.pp&#39;</span>
+  <span class="kw">end</span>
+<span class="kw">end</span></code></pre>
+<p>Pro tips:</p>
+<ul>
+<li>The <code>synced_folder</code> directive makes Puppet &quot;just work&quot;
+<ul>
+<li>No other directives needed (e.g. <code>module_path</code>, <code>manifest_path</code>)</li>
+<li>Installing files outside of modules</li>
+<li>Same <code>hiera.yml</code> for Vagrant and production</li>
+<li>Easier to reuse in production environment</li>
+</ul></li>
+<li>Mimic Puppet directory structure and best practices</li>
+</ul>
+</section><section id="lets-build-a-lamp-stack-1" class="slide level2">
+<h1>Let's build a LAMP stack!</h1>
+</section><section id="vagrantfile-2" class="slide level2">
+<h1>Vagrantfile</h1>
+<table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre></td><td class="sourceCode"><pre><code class="sourceCode ruby"><span class="dt">VAGRANTFILE_API_VERSION</span> = <span class="st">&#39;2&#39;</span>
+<span class="dt">HOST_NAME</span> = <span class="st">&#39;box001&#39;</span>
+<span class="dt">DOMAIN</span> = <span class="st">&#39;example.com&#39;</span>
+<span class="dt">HOST_IP</span> = <span class="st">&#39;192.168.56.65&#39;</span>
+
+<span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
+  config.vm.box = <span class="st">&#39;alphainternational/centos-6.5-x64&#39;</span>
+  config.vm.define <span class="dt">HOST_NAME</span> <span class="kw">do</span> |node|
+    node.vm.hostname = <span class="st">&quot;</span><span class="ot">#{</span><span class="dt">HOST_NAME</span><span class="ot">}</span><span class="st">.</span><span class="ot">#{</span><span class="dt">DOMAIN</span><span class="ot">}</span><span class="st">&quot;</span>
+    node.vm.network <span class="st">:private_network</span>,
+      ip: <span class="dt">HOST_IP</span>,
+      netmask: <span class="st">&#39;255.255.255.0&#39;</span>
+    node.vm.synced_folder <span class="st">&#39;html&#39;</span>, <span class="st">&#39;/var/www/html&#39;</span>
+    node.vm.synced_folder <span class="st">&#39;puppet&#39;</span>, <span class="st">&#39;/etc/puppet&#39;</span></code></pre></td></tr></table>
+</section><section id="vagrantfile-contd" class="slide level2">
+<h1>Vagrantfile (cont'd)</h1>
+<table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="sourceCode"><pre><code class="sourceCode ruby">    node.vm.provider <span class="st">:virtualbox</span> <span class="kw">do</span> |vb|
+      vb.name = <span class="dt">HOST_NAME</span>
+      vb.customize [<span class="st">&#39;modifyvm&#39;</span>, <span class="st">:id</span>, <span class="st">&#39;--memory&#39;</span>, <span class="dv">256</span>]
+    <span class="kw">end</span>
+
+    node.vm.provision <span class="st">&#39;puppet&#39;</span> <span class="kw">do</span> |puppet|
+      puppet.manifests_path = <span class="st">&#39;puppet/manifests&#39;</span>
+      puppet.manifest_file = <span class="st">&#39;site.pp&#39;</span>
+    <span class="kw">end</span>
+  <span class="kw">end</span>
+<span class="kw">end</span></code></pre></td></tr></table>
+</section><section id="puppet-project-structure" class="slide level2">
+<h1>Puppet project structure</h1>
+<pre><code>$ tree -I modules --prune puppet/
+puppet/
+|-- manifests
+|   |-- nodes
+|   |   |-- box001.pp
+|   |   `-- default.pp
+|   `-- site.pp
+`-- Puppetfile</code></pre>
+</section><section id="main-puppet-files" class="slide level2">
+<h1>Main Puppet files</h1>
+<pre class="puppet"><code># file manifests/site.pp
+
+# Load node definitions
+import &#39;nodes/*&#39;</code></pre>
+<pre class="puppet"><code># file manifests/nodes/default.pp
+
+node default {
+  notice(&quot;I&#39;m node ${::hostname} with IP ${::ipaddress_eth1}&quot;)
+
+}</code></pre>
+</section><section id="managing-3rd-party-modules" class="slide level2">
+<h1>Managing 3rd party modules</h1>
+<p>Here, we use librarian-puppet</p>
+<pre><code># Puppetfile -- Configuration for librarian-puppet
+# Bootstrap by running `librarian-puppet init`
+
+forge &quot;http://forge.puppetlabs.com&quot;
+
+mod &quot;puppetlabs/stdlib&quot;
+mod &quot;puppetlabs/concat&quot;
+
+mod &quot;puppetlabs/apache&quot;
+mod &quot;puppetlabs/mysql&quot;</code></pre>
+<p>Working with Git submodules is also common, e.g.</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">git</span> submodule add git@github.com:puppetlabs/puppetlabs-mysql.git modules/mysql
+$ <span class="kw">cd</span> modules/mysql
+$ <span class="kw">git</span> checkout tags/2.2.3</code></pre>
+</section><section id="definition-of-box001" class="slide level2">
+<h1>Definition of <code>box001</code></h1>
+<pre class="puppet numberLines"><code># file manifests/nodes/box001.pp
+
+node box001 inherits default {
+  # Apache and PHP
+  class { &#39;apache&#39;: }
+  class { &#39;apache::mod::php&#39;: }
+
+  package { &#39;php-mysql&#39;:
+    ensure =&gt; installed,
+  }
+
+  # MySQL
+  include &#39;::mysql::server&#39;
+
+  mysql::db { &#39;appdb&#39;:
+    user     =&gt; &#39;dbusr&#39;,
+    password =&gt; &#39;vaygDeesh1&#39;,
+    host     =&gt; &#39;localhost&#39;,
+  }
+
+}</code></pre>
+</section><section id="development-vs-production" class="slide level2">
+<h1>Development vs Production</h1>
+</section></section>
+<section class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><code>checkpoint-01</code><a href="#/fnref1">↩</a></p></li>
+</ol>
+</section>
     </div>
   </div>
 

@@ -24,7 +24,7 @@ Lecturer ICT at University College Ghent
 * VirtualBox 4.3.10
     * default Host-only network (192.168.56.0/24)
 
-```shell-session
+```console
 $ vagrant --version
 Vagrant 1.5.1
 $ VBoxHeadless --version
@@ -43,11 +43,9 @@ $ ifconfig vboxnet0
 ## Minimal default setup:
 
 ```bash
-
 $ vagrant init hashicorp/precise32
 $ vagrant up
 $ vagrant ssh
-
 ```
 
 ## What happens under the hood?
@@ -204,6 +202,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provider :virtualbox do |vb|
     vb.name = HOST_NAME
+    vb.customize ['modifyvm', :id, '--memory', 256]
   end
 end
 ```
@@ -318,6 +317,7 @@ $ vagrant init user/box   # Create Vagrantfile for specified base box
 $ vim Vagrantfile         # Customize your box
 $ vagrant up [host]       # Create VM(s) if needed and boot
 $ vagrant reload [host]   # After every change to Vagrantfile
+$ vagrant halt [host]     # Poweroff
 $ vagrant destroy [host]  # Clean up!
 $ vagrant ssh [host]      # log in
 $ vagrant status [host]   # Status of your VM(s)
@@ -354,6 +354,7 @@ Put the script into the same folder as `Vagrantfile`
 * Make sure every command runs without user interaction!
 * Record every command in the script
 * If everything works: `vagrant destroy -f && vagrant up`
+
 
 ## Provisioning script
 
@@ -400,7 +401,7 @@ MySQL is left as an exercise for the reader ;-)
 ## Disadvantages of shell provisioning
 
 > * Not very flexible
->     * Script should be non-interactive
+> * Script should be non-interactive
 > * Not scalable
 >     * Long Bash scripts are horrible!
 > * *Idempotence* not guaranteed
@@ -411,11 +412,18 @@ MySQL is left as an exercise for the reader ;-)
 
 ## Ansible
 
+<http://ansible.com/>
+
 * Provisioning tool written in Python
 * Simple configuration (YAML)
 * No agent necessary (but recommended for large setups)
+* Idempotent
 
-## Vagrantfile
+. . .
+
+(of course, you know this, you went to the talks yesterday...)
+
+## Vagrant configuration
 
 ```ruby
 config.vm.define 'box001' do |node|
@@ -433,30 +441,355 @@ Pro tips:
 * try to mimic standard Ansible directory structure
     * See [Ansible best practices](http://docs.ansible.com/playbooks_best_practices.html)
 
+## Let's build a LAMP stack!
+
+First, on one box
+
+Then, database on a separate machine
+
+## Vagrantfile
+
+```{.ruby .numberLines}
+VAGRANTFILE_API_VERSION = '2'
+hosts = [ { name: 'box001', ip: '192.168.56.65' },
+          { name: 'box002', ip: '192.168.56.66' } ]
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = 'alphainternational/centos-6.5-x64'
+  hosts.each do |host|
+    config.vm.define host[:name] do |node|
+      node.vm.hostname = host[:name]
+      node.vm.network :private_network,
+        ip: host[:ip],
+        netmask: '255.255.255.0'
+      node.vm.synced_folder 'html', '/var/www/html'
+
+      node.vm.provider :virtualbox do |vb|
+        vb.name = host[:name]
+      end
+
+      node.vm.provision 'ansible' do |ansible|
+        ansible.playbook = 'ansible/site.yml'
+      end
+    end
+  end
+end
+```
+
 ## Ansible project structure
 
 ```
-$ tree
-.
-|-- ansible
-|   |-- host_vars
-|   |   `-- box001
-|   |-- roles
-|   |   |-- apache
-|   |   |   `-- handlers
-|   |   |       `-- main.yml
-|   |   |   `-- tasks
-|   |   |       `-- main.yml
-|   |   |-- common
-|   |   |   `-- tasks
-|   |   |       `-- main.yml
-|   |   `-- db
-|   |       `-- tasks
-|   |   |       `-- main.yml
-|   `-- site.yml
-|-- html
-|   `-- index.php
-`-- Vagrantfile
+$ tree ansible/
+ansible/
+|-- group_vars
+|   `-- all
+|-- roles
+|   |-- common
+|   |   `-- tasks
+|   |       `-- main.yml
+|   |-- db
+|   |   `-- tasks
+|   |       `-- main.yml
+|   `-- web
+|       `-- tasks
+|           `-- main.yml
+`-- site.yml
 ```
+
+## Main Ansible config file: `site.yml`
+
+```yaml
+---
+- hosts: box001
+  sudo: true
+  roles:
+    - common
+    - web
+    - db
+```
+
+## *Common* role
+
+```yaml
+---
+# file common/tasks/main.yml
+- name: Install base packages
+  yum: pkg={{item}} state=installed
+  with_items:
+    - libselinux-python
+```
+
+## *Web* role
+
+```yaml
+---
+# file web/tasks/main.yml
+- name: Install Apache
+  yum: pkg={{item}} state=installed
+  with_items:
+    - httpd
+    - php
+    - php-xml
+    - php-mysql
+
+- name: Start Apache service
+  service: name=httpd state=running enabled=yes
+```
+
+## *Db* role
+
+```{.yaml .numberLines}
+---
+# file db/tasks/main.yml
+- name: Install MySQL
+  yum: pkg={{item}} state=installed
+  with_items:
+    - mysql
+    - mysql-server
+    - MySQL-python
+
+- name: Start MySQL service
+  service: name=mysqld state=running enabled=yes
+
+- name: Create application database
+  mysql_db: name={{ dbname }} state=present
+
+- name: Create application database user
+  mysql_user: name={{ dbuser }} password={{ dbpasswd }}
+                priv=*.*:ALL host='localhost' state=present
+```
+
+## Variables
+
+```yaml
+---
+# file group_vars/all
+
+# Application database
+dbname: appdb
+dbuser: appusr
+dbpasswd: CaxWeikun6
+```
+
+## Install a webapp
+
+E.g. [Mediawiki](http://www.mediawiki.org/wiki/Download)
+
+1. Unpack latest mediawiki.tar.gz into `html/wiki/` directory
+2. Surf to <http://192.168.56.65/wiki> and follow instructions
+3. Enter values from `group_vars/all` in the install page
+4. Download `LocalSite.php` and save in `html/wiki/`
+
+Automating Mediawiki installation is left as an exercise to the reader... ;-)
+
+## How to use this for production
+
+Inventory file, automatically created by Vagrant:
+
+```bash
+$ cat .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
+# Generated by Vagrant
+
+box001 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2222
+box002 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2200
+```
+
+In production, just use a different inventory file!
+
+## Move database to another box
+
+What should change?
+
+. . .
+
+```yaml
+---
+# file site.yml
+- hosts: box001
+  sudo: true
+  roles:
+    - common
+    - web
+
+- hosts: box002
+  sudo: true
+  roles:
+    - common
+    - db
+```
+
+## Move database to another box (cont'd)
+
+What should change?
+
+```yaml
+---
+# db/tasks/main.yml
+[...]
+- name: Create application database user
+  mysql_user: name={{ dbuser }} password={{ dbpasswd }}
+                priv=*.*:ALL host='%' state=present
+```
+
+This should be easy to automate
+
+# Provisioning with Puppet
+
+## Puppet
+
+<http://puppetlabs.com/>
+
+* One of the market leaders in configuration management
+* Has its own configuration language
+* Many reusable modules available
+* Needs an agent on hosts under control
+* Usually set up with a central server (puppet master)
+* Puppet should be already on your base box!
+
+. . .
+
+Do I have to introduce Puppet at all?
+
+## Vagrant configuration
+
+```ruby
+config.vm.define HOST_NAME do |node|
+  node.vm.synced_folder 'puppet', '/etc/puppet'
+  node.vm.provision 'puppet' do |puppet|
+    puppet.manifests_path = 'puppet/manifests'
+    puppet.manifest_file = 'site.pp'
+  end
+end
+```
+Pro tips:
+
+* The `synced_folder` directive makes Puppet "just work"
+    * No other directives needed (e.g. `module_path`, `manifest_path`)
+    * Installing files outside of modules
+    * Same `hiera.yml` for Vagrant and production
+    * Easier to reuse in production environment
+* Mimic Puppet directory structure and best practices
+
+## Let's build a LAMP stack!
+
+## Vagrantfile
+
+```{.ruby .numberLines}
+VAGRANTFILE_API_VERSION = '2'
+HOST_NAME = 'box001'
+DOMAIN = 'example.com'
+HOST_IP = '192.168.56.65'
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = 'alphainternational/centos-6.5-x64'
+  config.vm.define HOST_NAME do |node|
+    node.vm.hostname = "#{HOST_NAME}.#{DOMAIN}"
+    node.vm.network :private_network,
+      ip: HOST_IP,
+      netmask: '255.255.255.0'
+    node.vm.synced_folder 'html', '/var/www/html'
+    node.vm.synced_folder 'puppet', '/etc/puppet'
+```
+
+## Vagrantfile (cont'd)
+
+```{.ruby .numberLines}
+    node.vm.provider :virtualbox do |vb|
+      vb.name = HOST_NAME
+      vb.customize ['modifyvm', :id, '--memory', 256]
+    end
+
+    node.vm.provision 'puppet' do |puppet|
+      puppet.manifests_path = 'puppet/manifests'
+      puppet.manifest_file = 'site.pp'
+    end
+  end
+end
+
+```
+
+## Puppet project structure
+
+```
+$ tree -I modules --prune puppet/
+puppet/
+|-- manifests
+|   |-- nodes
+|   |   |-- box001.pp
+|   |   `-- default.pp
+|   `-- site.pp
+`-- Puppetfile
+```
+
+## Main Puppet files
+
+```puppet
+# file manifests/site.pp
+
+# Load node definitions
+import 'nodes/*'
+```
+
+```puppet
+# file manifests/nodes/default.pp
+
+node default {
+  notice("I'm node ${::hostname} with IP ${::ipaddress_eth1}")
+
+}
+```
+
+## Managing 3rd party modules
+
+Here, we use librarian-puppet
+
+```
+# Puppetfile -- Configuration for librarian-puppet
+# Bootstrap by running `librarian-puppet init`
+
+forge "http://forge.puppetlabs.com"
+
+mod "puppetlabs/stdlib"
+mod "puppetlabs/concat"
+
+mod "puppetlabs/apache"
+mod "puppetlabs/mysql"
+```
+
+Working with Git submodules is also common, e.g.
+
+```bash
+$ git submodule add git@github.com:puppetlabs/puppetlabs-mysql.git modules/mysql
+$ cd modules/mysql
+$ git checkout tags/2.2.3
+```
+
+## Definition of `box001`
+
+```{.puppet .numberLines}
+# file manifests/nodes/box001.pp
+
+node box001 inherits default {
+  # Apache and PHP
+  class { 'apache': }
+  class { 'apache::mod::php': }
+
+  package { 'php-mysql':
+    ensure => installed,
+  }
+
+  # MySQL
+  include '::mysql::server'
+
+  mysql::db { 'appdb':
+    user     => 'dbusr',
+    password => 'vaygDeesh1',
+    host     => 'localhost',
+  }
+
+}
+```
+
+## Development vs Production
 
 
