@@ -228,14 +228,99 @@ $ vagrant destroy -f
 $ vagrant up
 ```
 
+## Setup with multiple VMs
+
+
+Vagrantfile:
+
+```ruby
+config.vm.define HOST_NAME do |node|
+  node.vm.hostname = HOST_NAME
+  [...]
+end
+```
+
+Specify `HOST_NAME` after `vagrant` command:
+
+```bash
+$ vagrant status     # Status of *all* boxes
+$ vagrant up box001  # Boot box001
+$ vagrant up         # Boot *all* defined boxes
+$ vagrant ssh box001
+```
+
+## Setup with multiple VMs: Example
+
+```{.ruby .numberLines}
+VAGRANTFILE_API_VERSION = '2'
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.define 'box001' do |node|
+    node.vm.hostname = 'box001'
+    node.vm.box = 'alphainternational/centos-6.5-x64'
+    node.vm.network :private_network,
+      ip: '192.168.56.65',
+      netmask: '255.255.255.0'
+
+    node.vm.provider :virtualbox do |vb|
+      vb.name = 'box001'
+    end
+  end
+```
+
+## Setup with multiple VMs: Example (cont'd)
+
+```{.ruby .numberLines}
+  config.vm.define 'box002' do |node|
+    node.vm.hostname = 'box002'
+    node.vm.box = 'alphainternational/centos-6.5-x64'
+    node.vm.network :private_network,
+      ip: '192.168.56.66',
+      netmask: '255.255.255.0'
+
+    node.vm.provider :virtualbox do |vb|
+      vb.name = 'box002'
+    end
+  end
+end
+```
+
+## Setup with multiple VMs: Example (cont'd)
+
+Don't repeat yourself!
+
+```{.ruby .numberLines}
+hosts = [ { name: 'box001', ip: '192.168.56.65' },
+          { name: 'box002', ip: '192.168.56.66' }]
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  hosts.each do |host|
+    config.vm.define host[:name] do |node|
+      node.vm.hostname = host[:name]
+      node.vm.box = 'alphainternational/centos-6.5-x64'
+      node.vm.network :private_network,
+        ip: host[:ip],
+        netmask: '255.255.255.0'
+      node.vm.provider :virtualbox do |vb|
+        vb.name = host[:name]
+      end
+    end
+  end
+end
+```
+
+
 ## Summary
 
 ```bash
 $ vagrant init user/box   # Create Vagrantfile for specified base box
 $ vim Vagrantfile         # Customize your box
-$ vagrant up              # Create VM and boot it
-$ vagrant reload          # After every change to Vagrantfile
-$ vagrant destroy         # Clean up!
+$ vagrant up [host]       # Create VM(s) if needed and boot
+$ vagrant reload [host]   # After every change to Vagrantfile
+$ vagrant destroy [host]  # Clean up!
+$ vagrant ssh [host]      # log in
+$ vagrant status [host]   # Status of your VM(s)
 ```
 
 # Provisioning
@@ -250,6 +335,8 @@ $ vagrant destroy         # Clean up!
 * Chef (Solo + Client)
 * Docker
 * Salt
+
+# Shell provisioning
 
 ## Shell provisioning
 
@@ -287,6 +374,8 @@ cat > /var/www/html/index.php << EOF
 EOF
 ```
 
+MySQL is left as an exercise for the reader ;-)
+
 ## Synced folders
 
 * Add to your `Vagrantfile`:
@@ -317,5 +406,57 @@ EOF
 > * *Idempotence* not guaranteed
 >     * What happens when you run provision script multiple times?
 >     * Change to script is expensive: `vagrant destroy && vagrant up`
+
+# Provisioning with Ansible
+
+## Ansible
+
+* Provisioning tool written in Python
+* Simple configuration (YAML)
+* No agent necessary (but recommended for large setups)
+
+## Vagrantfile
+
+```ruby
+config.vm.define 'box001' do |node|
+  [...]
+  node.vm.provisioning 'ansible' do |ansible|
+    ansible.playbook = 'ansible/site.yml'
+  end
+end
+```
+
+Pro tips:
+
+* `define` directive is important to make automatic inventory work
+    * See [Vagrant/Ansible documentation](http://docs.vagrantup.com/v2/provisioning/ansible.html)
+* try to mimic standard Ansible directory structure
+    * See [Ansible best practices](http://docs.ansible.com/playbooks_best_practices.html)
+
+## Ansible project structure
+
+```
+$ tree
+.
+|-- ansible
+|   |-- host_vars
+|   |   `-- box001
+|   |-- roles
+|   |   |-- apache
+|   |   |   `-- handlers
+|   |   |       `-- main.yml
+|   |   |   `-- tasks
+|   |   |       `-- main.yml
+|   |   |-- common
+|   |   |   `-- tasks
+|   |   |       `-- main.yml
+|   |   `-- db
+|   |       `-- tasks
+|   |   |       `-- main.yml
+|   `-- site.yml
+|-- html
+|   `-- index.php
+`-- Vagrantfile
+```
 
 

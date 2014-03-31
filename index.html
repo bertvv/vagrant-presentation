@@ -234,13 +234,122 @@ $ <span class="kw">vagrant</span> ssh</code></pre>
 <p>Or, if the change is profound:</p>
 <pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> destroy -f
 $ <span class="kw">vagrant</span> up</code></pre>
+</section><section id="setup-with-multiple-vms" class="slide level2">
+<h1>Setup with multiple VMs</h1>
+<p>Vagrantfile:</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby">config.vm.define <span class="dt">HOST_NAME</span> <span class="kw">do</span> |node|
+  node.vm.hostname = <span class="dt">HOST_NAME</span>
+  [...]
+<span class="kw">end</span></code></pre>
+<p>Specify <code>HOST_NAME</code> after <code>vagrant</code> command:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> status     <span class="co"># Status of *all* boxes</span>
+$ <span class="kw">vagrant</span> up box001  <span class="co"># Boot box001</span>
+$ <span class="kw">vagrant</span> up         <span class="co"># Boot *all* defined boxes</span>
+$ <span class="kw">vagrant</span> ssh box001</code></pre>
+</section><section id="setup-with-multiple-vms-example" class="slide level2">
+<h1>Setup with multiple VMs: Example</h1>
+<table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre></td><td class="sourceCode"><pre><code class="sourceCode ruby"><span class="dt">VAGRANTFILE_API_VERSION</span> = <span class="st">&#39;2&#39;</span>
+
+<span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
+
+  config.vm.define <span class="st">&#39;box001&#39;</span> <span class="kw">do</span> |node|
+    node.vm.hostname = <span class="st">&#39;box001&#39;</span>
+    node.vm.box = <span class="st">&#39;alphainternational/centos-6.5-x64&#39;</span>
+    node.vm.network <span class="st">:private_network</span>,
+      ip: <span class="st">&#39;192.168.56.65&#39;</span>,
+      netmask: <span class="st">&#39;255.255.255.0&#39;</span>
+
+    node.vm.provider <span class="st">:virtualbox</span> <span class="kw">do</span> |vb|
+      vb.name = <span class="st">&#39;box001&#39;</span>
+    <span class="kw">end</span>
+  <span class="kw">end</span></code></pre></td></tr></table>
+</section><section id="setup-with-multiple-vms-example-contd" class="slide level2">
+<h1>Setup with multiple VMs: Example (cont'd)</h1>
+<table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="sourceCode"><pre><code class="sourceCode ruby">  config.vm.define <span class="st">&#39;box002&#39;</span> <span class="kw">do</span> |node|
+    node.vm.hostname = <span class="st">&#39;box002&#39;</span>
+    node.vm.box = <span class="st">&#39;alphainternational/centos-6.5-x64&#39;</span>
+    node.vm.network <span class="st">:private_network</span>,
+      ip: <span class="st">&#39;192.168.56.66&#39;</span>,
+      netmask: <span class="st">&#39;255.255.255.0&#39;</span>
+
+    node.vm.provider <span class="st">:virtualbox</span> <span class="kw">do</span> |vb|
+      vb.name = <span class="st">&#39;box002&#39;</span>
+    <span class="kw">end</span>
+  <span class="kw">end</span>
+<span class="kw">end</span></code></pre></td></tr></table>
+</section><section id="setup-with-multiple-vms-example-contd-1" class="slide level2">
+<h1>Setup with multiple VMs: Example (cont'd)</h1>
+<p>Don't repeat yourself!</p>
+<table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="sourceCode"><pre><code class="sourceCode ruby">hosts = [ { name: <span class="st">&#39;box001&#39;</span>, ip: <span class="st">&#39;192.168.56.65&#39;</span> },
+          { name: <span class="st">&#39;box002&#39;</span>, ip: <span class="st">&#39;192.168.56.66&#39;</span> }]
+
+<span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
+  hosts.each <span class="kw">do</span> |host|
+    config.vm.define host[<span class="st">:name</span>] <span class="kw">do</span> |node|
+      node.vm.hostname = host[<span class="st">:name</span>]
+      node.vm.box = <span class="st">&#39;alphainternational/centos-6.5-x64&#39;</span>
+      node.vm.network <span class="st">:private_network</span>,
+        ip: host[<span class="st">:ip</span>],
+        netmask: <span class="st">&#39;255.255.255.0&#39;</span>
+      node.vm.provider <span class="st">:virtualbox</span> <span class="kw">do</span> |vb|
+        vb.name = host[<span class="st">:name</span>]
+      <span class="kw">end</span>
+    <span class="kw">end</span>
+  <span class="kw">end</span>
+<span class="kw">end</span></code></pre></td></tr></table>
 </section><section id="summary" class="slide level2">
 <h1>Summary</h1>
 <pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> init user/box   <span class="co"># Create Vagrantfile for specified base box</span>
 $ <span class="kw">vim</span> Vagrantfile         <span class="co"># Customize your box</span>
-$ <span class="kw">vagrant</span> up              <span class="co"># Create VM and boot it</span>
-$ <span class="kw">vagrant</span> reload          <span class="co"># After every change to Vagrantfile</span>
-$ <span class="kw">vagrant</span> destroy         <span class="co"># Clean up!</span></code></pre>
+$ <span class="kw">vagrant</span> up [host]       <span class="co"># Create VM(s) if needed and boot</span>
+$ <span class="kw">vagrant</span> reload [host]   <span class="co"># After every change to Vagrantfile</span>
+$ <span class="kw">vagrant</span> destroy [host]  <span class="co"># Clean up!</span>
+$ <span class="kw">vagrant</span> ssh [host]      <span class="co"># log in</span>
+$ <span class="kw">vagrant</span> status [host]   <span class="co"># Status of your VM(s)</span></code></pre>
 </section></section>
 <section><section id="provisioning" class="titleslide slide level1"><h1>Provisioning</h1></section><section id="provisioning-1" class="slide level2">
 <h1>Provisioning</h1>
@@ -253,7 +362,8 @@ $ <span class="kw">vagrant</span> destroy         <span class="co"># Clean up!</
 <li>Docker</li>
 <li>Salt</li>
 </ul>
-</section><section id="shell-provisioning" class="slide level2">
+</section></section>
+<section><section id="shell-provisioning" class="titleslide slide level1"><h1>Shell provisioning</h1></section><section id="shell-provisioning-1" class="slide level2">
 <h1>Shell provisioning</h1>
 <p>Add to your Vagrantfile</p>
 <pre class="sourceCode ruby"><code class="sourceCode ruby">config.vm.provision <span class="st">&#39;shell&#39;</span>, path: <span class="st">&#39;provision.sh&#39;</span></code></pre>
@@ -281,6 +391,7 @@ $ <span class="kw">vagrant</span> destroy         <span class="co"># Clean up!</
 <span class="kw">cat</span> <span class="kw">&gt;</span> /var/www/html/index.php &lt;&lt; EOF
 &lt;?<span class="kw">php</span> phpinfo(); <span class="kw">?&gt;</span>
 EOF</code></pre>
+<p>MySQL is left as an exercise for the reader ;-)</p>
 </section><section id="synced-folders" class="slide level2">
 <h1>Synced folders</h1>
 <ul>
@@ -312,6 +423,57 @@ EOF</code></pre>
 <li class="fragment">Change to script is expensive: <code>vagrant destroy &amp;&amp; vagrant up</code></li>
 </ul></li>
 </ul>
+</section></section>
+<section><section id="provisioning-with-ansible" class="titleslide slide level1"><h1>Provisioning with Ansible</h1></section><section id="ansible" class="slide level2">
+<h1>Ansible</h1>
+<ul>
+<li>Provisioning tool written in Python</li>
+<li>Simple configuration (YAML)</li>
+<li>No agent necessary (but recommended for large setups)</li>
+</ul>
+</section><section id="vagrantfile-1" class="slide level2">
+<h1>Vagrantfile</h1>
+<pre class="sourceCode ruby"><code class="sourceCode ruby">config.vm.define <span class="st">&#39;box001&#39;</span> <span class="kw">do</span> |node|
+  [...]
+  node.vm.provisioning <span class="st">&#39;ansible&#39;</span> <span class="kw">do</span> |ansible|
+    ansible.playbook = <span class="st">&#39;ansible/site.yml&#39;</span>
+  <span class="kw">end</span>
+<span class="kw">end</span></code></pre>
+<p>Pro tips:</p>
+<ul>
+<li><code>define</code> directive is important to make automatic inventory work
+<ul>
+<li>See <a href="http://docs.vagrantup.com/v2/provisioning/ansible.html">Vagrant/Ansible documentation</a></li>
+</ul></li>
+<li>try to mimic standard Ansible directory structure
+<ul>
+<li>See <a href="http://docs.ansible.com/playbooks_best_practices.html">Ansible best practices</a></li>
+</ul></li>
+</ul>
+</section><section id="ansible-project-structure" class="slide level2">
+<h1>Ansible project structure</h1>
+<pre><code>$ tree
+.
+|-- ansible
+|   |-- host_vars
+|   |   `-- box001
+|   |-- roles
+|   |   |-- apache
+|   |   |   `-- handlers
+|   |   |       `-- main.yml
+|   |   |   `-- tasks
+|   |   |       `-- main.yml
+|   |   |-- common
+|   |   |   `-- tasks
+|   |   |       `-- main.yml
+|   |   `-- db
+|   |       `-- tasks
+|   |   |       `-- main.yml
+|   `-- site.yml
+|-- html
+|   `-- index.php
+`-- Vagrantfile
+</code></pre>
 </section></section>
     </div>
   </div>
