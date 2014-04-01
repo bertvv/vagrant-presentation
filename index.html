@@ -79,6 +79,12 @@ All rights reserved.
 4.3.10r93012
 $ ifconfig vboxnet0
 =&gt; 192.168.56.1</code></pre>
+</section><section id="try-it-yourself" class="slide level2">
+<h1>Try it yourself</h1>
+<ul>
+<li>Clone the repository <code>git clone git@github.com:bertvv/load2014-Vagrant-example.git</code></li>
+<li>When the slides mention &quot;<code>checkpoint-nn</code>&quot;, you can do <code>git checkout tags/checkpoint-nn</code></li>
+</ul>
 </section></section>
 <section><section id="getting-up-and-running" class="titleslide slide level1"><h1>Getting up and running</h1></section><section id="minimal-default-setup" class="slide level2">
 <h1>Minimal default setup:</h1>
@@ -144,7 +150,7 @@ vagrant@precise32:~$ </code></pre>
 <section><section id="lets-build-a-centos-lamp-stack" class="titleslide slide level1"><h1>Let's build a CentOS LAMP stack!</h1></section></section>
 <section><section id="configuring-vagrant-boxes" class="titleslide slide level1"><h1>Configuring Vagrant boxes</h1></section><section id="vagrantfile" class="slide level2">
 <h1>Vagrantfile</h1>
-<p>Minimal Vagrantfile<a href="#/fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>:</p>
+<p>Minimal Vagrantfile (<code>checkpoint-01</code>):</p>
 <pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="dt">VAGRANTFILE_API_VERSION</span> = <span class="st">&#39;2&#39;</span>
 
 <span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
@@ -189,6 +195,7 @@ $ <span class="kw">vagrant</span> up
 $ <span class="kw">vagrant</span> ssh</code></pre>
 </section><section id="configuring-the-vm" class="slide level2">
 <h1>Configuring the VM</h1>
+<p>(<code>checkpoint-02</code>)</p>
 <table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
 2
 3
@@ -223,6 +230,8 @@ $ <span class="kw">vagrant</span> ssh</code></pre>
     vb.customize [<span class="st">&#39;modifyvm&#39;</span>, <span class="st">:id</span>, <span class="st">&#39;--memory&#39;</span>, <span class="dv">256</span>]
   <span class="kw">end</span>
 <span class="kw">end</span></code></pre></td></tr></table>
+</section><section id="configuring-the-vm-1" class="slide level2">
+<h1>Configuring the VM</h1>
 <p>For more info,</p>
 <ul>
 <li>see the docs at <a href="https://docs.vagrantup.com/">https://docs.vagrantup.com/</a></li>
@@ -249,6 +258,7 @@ $ <span class="kw">vagrant</span> up         <span class="co"># Boot *all* defin
 $ <span class="kw">vagrant</span> ssh box001</code></pre>
 </section><section id="setup-with-multiple-vms-example" class="slide level2">
 <h1>Setup with multiple VMs: Example</h1>
+<p>(<code>checkpoint-03</code>)</p>
 <table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
 2
 3
@@ -307,7 +317,7 @@ $ <span class="kw">vagrant</span> ssh box001</code></pre>
 <span class="kw">end</span></code></pre></td></tr></table>
 </section><section id="setup-with-multiple-vms-example-contd-1" class="slide level2">
 <h1>Setup with multiple VMs: Example (cont'd)</h1>
-<p>Don't repeat yourself!</p>
+<p>Don't repeat yourself! (<code>checkpoint-04</code>)</p>
 <table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
 2
 3
@@ -380,6 +390,7 @@ $ <span class="kw">vagrant</span> status [host]   <span class="co"># Status of y
 </ul>
 </section><section id="provisioning-script" class="slide level2">
 <h1>Provisioning script</h1>
+<p>(<code>checkpoint-05</code>)</p>
 <p>Installs Apache and PHP</p>
 <pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash -eu</span>
 <span class="co"># provision.sh -- Install Apache and a test PHP script</span>
@@ -396,6 +407,7 @@ EOF</code></pre>
 <p>MySQL is left as an exercise for the reader ;-)</p>
 </section><section id="synced-folders" class="slide level2">
 <h1>Synced folders</h1>
+<p>(<code>checkpoint-06</code>)</p>
 <ul>
 <li><p>Add to your <code>Vagrantfile</code>:</p>
 <pre class="sourceCode ruby"><code class="sourceCode ruby">config.vm.synced_folder <span class="st">&#39;html&#39;</span>, <span class="st">&#39;/var/www/html&#39;</span></code></pre></li>
@@ -461,6 +473,7 @@ EOF</code></pre>
 <p>Then, database on a separate machine</p>
 </section><section id="vagrantfile-1" class="slide level2">
 <h1>Vagrantfile</h1>
+<p>(<code>checkpoint-07</code>)</p>
 <table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
 2
 3
@@ -625,6 +638,7 @@ ansible/
 <p>In production, just use a different inventory file!</p>
 </section><section id="move-database-to-another-box" class="slide level2">
 <h1>Move database to another box</h1>
+<p>(<code>checkpoint-08</code>)</p>
 <p>What should change?</p>
 <div class="fragment">
 <pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
@@ -690,6 +704,7 @@ ansible/
 <h1>Let's build a LAMP stack!</h1>
 </section><section id="vagrantfile-2" class="slide level2">
 <h1>Vagrantfile</h1>
+<p>(<code>checkpoint-09</code>)</p>
 <table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
 2
 3
@@ -790,7 +805,7 @@ node box001 inherits default {
   class { &#39;apache&#39;: }
   class { &#39;apache::mod::php&#39;: }
 
-  package { &#39;php-mysql&#39;:
+  package { [ &#39;php-mysql&#39;, &#39;php-xml&#39; ]:
     ensure =&gt; installed,
   }
 
@@ -806,13 +821,116 @@ node box001 inherits default {
 }</code></pre>
 </section><section id="development-vs-production" class="slide level2">
 <h1>Development vs Production</h1>
+<p>(<code>checkpoint-10</code>)</p>
+<p>How to handle differences between development and production?</p>
+<p>Puppet's answer: Hiera</p>
+</section><section id="hiera-configuration" class="slide level2">
+<h1>Hiera configuration</h1>
+<p><code>puppet/hiera.yaml</code>:</p>
+<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
+<span class="fu">:backends:</span>
+  <span class="kw">-</span> yaml
+<span class="fu">:hierarchy:</span>
+  <span class="kw">-</span> <span class="st">&#39;%{::environment}/%{::clientcert}&#39;</span>
+  <span class="kw">-</span> <span class="st">&#39;common&#39;</span>
+<span class="fu">:yaml:</span>
+  <span class="fu">:datadir:</span> <span class="st">&#39;/etc/puppet/hiera&#39;</span></code></pre>
+<pre><code>$ tree puppet/hiera
+puppet/hiera
+|-- common.yaml
+|-- development
+|   `-- box001.example.com.yaml
+`-- production
+    `-- box001.example.com.yaml</code></pre>
+</section><section id="hiera-data" class="slide level2">
+<h1>Hiera data</h1>
+<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
+<span class="co"># file hiera/common.yaml</span>
+<span class="fu">mysql:</span>:host: localhost</code></pre>
+<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
+<span class="co"># puppet/hiera/development/box001.example.com.yaml</span>
+<span class="fu">mysql:</span>:appdb: &#39;appdb&#39;
+<span class="fu">mysql:</span>:user: &#39;dbusr&#39;
+<span class="fu">mysql:</span>:password: &#39;letmein&#39;</code></pre>
+<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
+<span class="co"># file puppet/hiera/production/box001.example.com.yaml</span>
+<span class="fu">mysql:</span>:appdb: &#39;db72437&#39;
+<span class="fu">mysql:</span>:user:  &#39;u440380&#39;
+<span class="fu">mysql:</span>:password: &#39;ifwoHaffEtHafwivIj7&#39;</code></pre>
+</section><section id="using-hiera-data" class="slide level2">
+<h1>Using Hiera data</h1>
+<p><code>Vagrantfile:</code></p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby">node.vm.provision <span class="st">&#39;puppet&#39;</span> <span class="kw">do</span> |puppet|
+  puppet.manifests_path = <span class="st">&#39;puppet/manifests&#39;</span>
+  puppet.manifest_file = <span class="st">&#39;site.pp&#39;</span>
+  puppet.options = [ <span class="st">&#39;--environment development&#39;</span> ]
+<span class="kw">end</span></code></pre>
+<p><code>puppet/manifests/nodes/box001.pp</code></p>
+<pre class="puppet"><code>  $appdb = hiera(&#39;mysql::appdb&#39;)
+
+  mysql::db { $appdb:
+    user     =&gt; hiera(&#39;mysql::user&#39;),
+    password =&gt; hiera(&#39;mysql::password&#39;),
+    host     =&gt; hiera(&#39;mysql::host&#39;),
+  }</code></pre>
 </section></section>
-<section class="footnotes">
-<hr />
-<ol>
-<li id="fn1"><p><code>checkpoint-01</code><a href="#/fnref1">↩</a></p></li>
+<section><section id="creating-base-boxes" class="titleslide slide level1"><h1>Creating base boxes</h1></section><section id="creating-base-boxes-1" class="slide level2">
+<h1>Creating base boxes</h1>
+<p>Sometimes, the available base boxes just aren't good enough...</p>
+</section><section id="manually" class="slide level2">
+<h1>Manually</h1>
+<ol type="1">
+<li>Create a VM, and take some <a href="http://docs.vagrantup.com/v2/boxes/base.html">requirements</a> into account
+<ul>
+<li>a.o. <code>vagrant</code> user with sudo, ssh, package manager, Guest Additions</li>
+<li>if you want: Puppet, Chef, ...</li>
+</ul></li>
+<li>Execute <code>vagrant package --base my-vm</code>
+<ul>
+<li>Result: file <code>my-vm.box</code></li>
+</ul></li>
 </ol>
-</section>
+</section><section id="disadvantages" class="slide level2">
+<h1>Disadvantages</h1>
+<ul>
+<li>It's manual</li>
+<li>Not quite reproducable for other provider (e.g. VMWare, Hyper-V, bare metal)</li>
+</ul>
+</section><section id="enter-packer" class="slide level2">
+<h1>Enter Packer</h1>
+<p><a href="http://www.packer.io/">http://www.packer.io/</a></p>
+<blockquote>
+<p>Packer is a tool for creating identical machine images for multiple platforms from a single source configuration.</p>
+</blockquote>
+</section><section id="packer-template" class="slide level2">
+<h1>Packer template</h1>
+<ul>
+<li>JSON file with settings
+<ul>
+<li>e.g. ISO download URL, VM type, provisioner</li>
+</ul></li>
+<li>Kickstart file
+<ul>
+<li>Automates installation from ISO</li>
+</ul></li>
+<li>Post-installation scripts
+<ul>
+<li>e.g. Configure for Vagrant, install Puppet, clean up yum repository, zerodisk (smaller disk images)</li>
+</ul></li>
+<li>Find loads of Packer templates at <a href="https://github.com/misheska/basebox-packer">https://github.com/misheska/basebox-packer</a>
+<ul>
+<li>Cr*p, only for Chef &amp; Salt...</li>
+</ul></li>
+</ul>
+</section></section>
+<section><section id="thats-it" class="titleslide slide level1"><h1>That's it!</h1></section><section id="thank-you" class="slide level2">
+<h1>Thank you!</h1>
+<p>Presentation slides: <a href="https://github.com/bertvv/vagrant-presentation">https://github.com/bertvv/vagrant-presentation</a></p>
+<p>Code: <a href="https://github.com/bertvv/vagrant-example">https://github.com/bertvv/vagrant-example</a></p>
+<p>More at:</p>
+<p><a href="https://github.com/bertvv/">https://github.com/bertvv/</a> <a href="https://bitbucket.org/bertvanvreckem/">https://bitbucket.org/bertvanvreckem/</a> <a href="https://www.youtube.com/user/bertvvrhogent/">https://www.youtube.com/user/bertvvrhogent/</a></p>
+<p><a href="https://twitter.com/bertvanvreckem">@bertvanvreckem</a></p>
+</section></section>
     </div>
   </div>
 

@@ -37,6 +37,12 @@ $ ifconfig vboxnet0
 => 192.168.56.1
 ```
 
+## Try it yourself
+
+* Clone the repository
+  `git clone git@github.com:bertvv/load2014-Vagrant-example.git`
+* When the slides mention "`checkpoint-nn`", you can do
+  `git checkout tags/checkpoint-nn`
 
 # Getting up and running
 
@@ -124,7 +130,7 @@ vagrant@precise32:~$
 
 ## Vagrantfile
 
-Minimal Vagrantfile:
+Minimal Vagrantfile (`checkpoint-01`):
 
 ```ruby
 VAGRANTFILE_API_VERSION = '2'
@@ -187,6 +193,8 @@ $ vagrant ssh
 
 ## Configuring the VM
 
+(`checkpoint-02`)
+
 ```{.ruby .numberLines}
 VAGRANTFILE_API_VERSION = '2'
 
@@ -206,6 +214,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 end
 ```
+
+## Configuring the VM
 
 For more info,
 
@@ -250,6 +260,8 @@ $ vagrant ssh box001
 
 ## Setup with multiple VMs: Example
 
+(`checkpoint-03`)
+
 ```{.ruby .numberLines}
 VAGRANTFILE_API_VERSION = '2'
 
@@ -287,7 +299,7 @@ end
 
 ## Setup with multiple VMs: Example (cont'd)
 
-Don't repeat yourself!
+Don't repeat yourself! (`checkpoint-04`)
 
 ```{.ruby .numberLines}
 hosts = [ { name: 'box001', ip: '192.168.56.65' },
@@ -358,6 +370,8 @@ Put the script into the same folder as `Vagrantfile`
 
 ## Provisioning script
 
+(`checkpoint-05`)
+
 Installs Apache and PHP
 
 ```bash
@@ -378,6 +392,8 @@ EOF
 MySQL is left as an exercise for the reader ;-)
 
 ## Synced folders
+
+(`checkpoint-06`)
 
 * Add to your `Vagrantfile`:
 
@@ -448,6 +464,8 @@ First, on one box
 Then, database on a separate machine
 
 ## Vagrantfile
+
+(`checkpoint-07`)
 
 ```{.ruby .numberLines}
 VAGRANTFILE_API_VERSION = '2'
@@ -598,6 +616,8 @@ In production, just use a different inventory file!
 
 ## Move database to another box
 
+(`checkpoint-08`)
+
 What should change?
 
 . . .
@@ -673,6 +693,8 @@ Pro tips:
 ## Let's build a LAMP stack!
 
 ## Vagrantfile
+
+(`checkpoint-09`)
 
 ```{.ruby .numberLines}
 VAGRANTFILE_API_VERSION = '2'
@@ -774,7 +796,7 @@ node box001 inherits default {
   class { 'apache': }
   class { 'apache::mod::php': }
 
-  package { 'php-mysql':
+  package { [ 'php-mysql', 'php-xml' ]:
     ensure => installed,
   }
 
@@ -792,4 +814,135 @@ node box001 inherits default {
 
 ## Development vs Production
 
+(`checkpoint-10`)
+
+How to handle differences between development and production?
+
+Puppet's answer: Hiera
+
+## Hiera configuration
+
+`puppet/hiera.yaml`:
+
+```yaml
+---
+:backends:
+  - yaml
+:hierarchy:
+  - '%{::environment}/%{::clientcert}'
+  - 'common'
+:yaml:
+  :datadir: '/etc/puppet/hiera'
+```
+
+```
+$ tree puppet/hiera
+puppet/hiera
+|-- common.yaml
+|-- development
+|   `-- box001.example.com.yaml
+`-- production
+    `-- box001.example.com.yaml
+```
+
+## Hiera data
+
+```yaml
+---
+# file hiera/common.yaml
+mysql::host: localhost
+```
+
+```yaml
+---
+# puppet/hiera/development/box001.example.com.yaml
+mysql::appdb: 'appdb'
+mysql::user: 'dbusr'
+mysql::password: 'letmein'
+```
+
+```yaml
+---
+# file puppet/hiera/production/box001.example.com.yaml
+mysql::appdb: 'db72437'
+mysql::user:  'u440380'
+mysql::password: 'ifwoHaffEtHafwivIj7'
+```
+
+## Using Hiera data
+
+`Vagrantfile:`
+
+```ruby
+node.vm.provision 'puppet' do |puppet|
+  puppet.manifests_path = 'puppet/manifests'
+  puppet.manifest_file = 'site.pp'
+  puppet.options = [ '--environment development' ]
+end
+```
+
+`puppet/manifests/nodes/box001.pp`
+
+```puppet
+  $appdb = hiera('mysql::appdb')
+
+  mysql::db { $appdb:
+    user     => hiera('mysql::user'),
+    password => hiera('mysql::password'),
+    host     => hiera('mysql::host'),
+  }
+```
+
+# Creating base boxes
+
+## Creating base boxes
+
+Sometimes, the available base boxes just aren't good enough...
+
+## Manually
+
+1. Create a VM, and take some [requirements](http://docs.vagrantup.com/v2/boxes/base.html) into account
+    * a.o. `vagrant` user with sudo, ssh, package manager, Guest Additions
+    * if you want: Puppet, Chef, ...
+2. Execute `vagrant package --base my-vm`
+    * Result: file `my-vm.box`
+
+## Disadvantages
+
+* It's manual
+* Not quite reproducable for other provider (e.g. VMWare, Hyper-V, bare metal)
+
+## Enter Packer
+
+<http://www.packer.io/>
+
+>Packer is a tool for creating identical machine images for multiple platforms from a single source configuration.
+
+
+## Packer template
+
+* JSON file with settings
+    * e.g. ISO download URL, VM type, provisioner
+* Kickstart file
+    * Automates installation from ISO
+* Post-installation scripts
+    * e.g. Configure for Vagrant, install Puppet, clean up yum repository, zerodisk (smaller disk images)
+* Find loads of Packer templates at <https://github.com/misheska/basebox-packer>
+    * Cr*p, only for Chef & Salt...
+
+# That's it!
+
+## Thank you!
+
+Presentation slides: <https://github.com/bertvv/vagrant-presentation>
+
+Code: <https://github.com/bertvv/vagrant-example>
+
+More at:
+
+<https://github.com/bertvv/>
+<https://bitbucket.org/bertvanvreckem/>
+<https://www.youtube.com/user/bertvvrhogent/>
+
+[\@bertvanvreckem](https://twitter.com/bertvanvreckem)
 
