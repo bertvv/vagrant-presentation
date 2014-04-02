@@ -12,4 +12,7 @@ To view the presentation, execute `make` in this directory and open `index.html`
 
 The presentation contains several hands-on examples. The source code of these can be found at <http://github.com/bertvv/vagrant-example/>.
 
+## License
+
+This work is licensed under a [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0/). Source code of the examples is licensed under the [MIT License](http://opensource.org/licenses/mit-license.php).
 

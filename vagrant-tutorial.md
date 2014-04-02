@@ -1,28 +1,69 @@
 % Vagrant tutorial
 % Bert Van Vreckem
-% LOADays, 4-5 April 2014
+% LOADays, 5-6 April 2014
 
 ## Whoami
 
 *Bert Van Vreckem*
 
-Lecturer ICT at University College Ghent
+* Lecturer ICT at University College Ghent
+    * Mainly Linux & open source
+    * Coordinator Bachelor thesises
+* [\@bertvanvreckem](https://twitter.com/bertvanvreckem/)
+* [+BertVanVreckem](https://plus.google.com/u/0/115779954316390709355)
+* <http://be.linkedin.com/in/bertvanvreckem/>
+* <http://youtube.com/user/bertvvhogent/>
+* <http://hogentsysadmin.wordpress.com/>
 
 ## Have a question/remark? Please interrupt me!
 
 ## Agenda
 
+* Vagrant introduction
+* Getting base boxes
+* Configuring boxes
+* Provisioning
+    * shell, Ansible, Puppet
+    * setting up a LAMP stack
+* Creating base boxes
+
 # Introduction
 
 ## What is Vagrant?
 
-## Why using Vagrant?
+<http://www.vagrantup.com/>
+
+* Written by [Mitchell Hashimoto](https://twitter.com/mitchellh)
+* Command line tool
+* Automates VM creation with
+    * VirtualBox
+    * VMWare
+    * Hyper-V
+* Integrates well with configuration management tools
+    * Shell
+    * Ansible
+    * Chef
+    * Puppet
+* Runs on Linux, Windows, MacOS
+
+## Why use Vagrant?
+
+> * Create new VMs quickly and easily
+>     * Only one command! `vagrant up`
+> * Keep the number of VMs under control
+> * Reproducability
+> * Identical environment in development and production
+> * Portability
+>     * No more 4GB .ova files
+>     * `git clone` and `vagrant up`
 
 ## Assumptions
 
-* Vagrant version 1.5.1
+* Git
+* Vagrant 1.5.1
 * VirtualBox 4.3.10
     * default Host-only network (192.168.56.0/24)
+* `librarian-puppet`
 
 ```console
 $ vagrant --version
@@ -40,7 +81,7 @@ $ ifconfig vboxnet0
 ## Try it yourself
 
 * Clone the repository
-  `git clone git@github.com:bertvv/load2014-Vagrant-example.git`
+  `git clone git@github.com:bertvv/vagrant-example.git`
 * When the slides mention "`checkpoint-nn`", you can do
   `git checkout tags/checkpoint-nn`
 
@@ -61,7 +102,7 @@ $ vagrant ssh
 $ vagrant init hashicorp/precise32
 ```
 
-A *Vagrantfile* is created
+A *Vagrantfile* is created (that's all!)
 
 ## What happens under the hood?
 
@@ -111,6 +152,19 @@ Bringing machine 'default' up with 'virtualbox' provider...
     default: /vagrant => /home/bert/CfgMgmt/vagrant-example
 ```
 
+## What happens under the hood?
+
+```bash
+$ vagrant init hashicorp/precise32
+```
+
+* The base box is downloaded and stored locally
+    * in `~/.vagrant.d/boxes/`
+* A new VM is created and configured with the base box as template
+* The VM is booted
+* The box is *provisioned*
+    * only the first time, must be done manually afterwards
+
 ## Done!
 
 You now have a working VM, ready for use:
@@ -124,8 +178,6 @@ Welcome to your Vagrant-built virtual machine.
 Last login: Fri Sep 14 06:22:31 2012 from 10.0.2.2
 vagrant@precise32:~$ 
 ```
-# Let's build a CentOS LAMP stack!
-
 # Configuring Vagrant boxes
 
 ## Vagrantfile
@@ -140,9 +192,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 end
 ```
 
+Vagrantfile = Ruby
+
+. . .
+
 This is Ubuntu 12.04 LTS 32 bit,
 
-we want CentOS 6.5 64 bit
+Let's say we want CentOS 6.5 64 bit
 
 ## Finding base boxes
 
@@ -158,7 +214,7 @@ $ vagrant init alphainternational/centos-6.5-x64
 ```
 . . .
 
-From the command line ("old" style):
+From the command line ("old", pre-1.5 style):
 
 ```bash
 $ vagrant box add --name centos65 \
@@ -282,7 +338,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 ## Setup with multiple VMs: Example (cont'd)
 
-```{.ruby .numberLines}
+```{.ruby .numberLines startFrom="16"}
   config.vm.define 'box002' do |node|
     node.vm.hostname = 'box002'
     node.vm.box = 'alphainternational/centos-6.5-x64'
@@ -430,7 +486,7 @@ MySQL is left as an exercise for the reader ;-)
 
 <http://ansible.com/>
 
-* Provisioning tool written in Python
+* Configuration management tool written in Python
 * Simple configuration (YAML)
 * No agent necessary (but recommended for large setups)
 * Idempotent
@@ -588,6 +644,15 @@ dbname: appdb
 dbuser: appusr
 dbpasswd: CaxWeikun6
 ```
+
+## Workflow
+
+1. Write `Vagrantfile`
+    * `vagrant up` and `vagrant reload` until you get it right
+2. Write configuration
+    * `vagrant provision` until you get it right
+3. Think you're done?
+    * `vagrant destroy -f` and `vagrant up`
 
 ## Install a webapp
 
@@ -893,6 +958,45 @@ end
   }
 ```
 
+# Best practices
+
+## Best practices
+
+> * Follow guidelines of CfgMgmt tool
+    * so you can use your box outside of Vagrant
+> * Keep `Vagrantfile` minimal
+    * change `Vagrantfile` => `vagrant reload`
+    * more expensive than `vagrant provision`
+
+## `Vagrantfile` bloat
+
+```{.ruby .numberLines}
+  # Enable provisioning with chef solo
+  config.vm.provision :chef_solo do |chef|
+    chef.cookbooks_path = "cookbooks"
+    chef.add_recipe "yum"
+    chef.add_recipe "yum::epel"
+    chef.add_recipe "openssl"
+    chef.add_recipe "apache2"
+    chef.add_recipe "apache2::default"
+    chef.add_recipe "apache2::mod_ssl"
+    chef.add_recipe "mysql"
+    chef.add_recipe "mysql::server"
+    chef.add_recipe "php"
+    chef.add_recipe "php::module_apc"
+    chef.add_recipe "php::module_curl"
+    chef.add_recipe "php::module_mysql"
+    chef.add_recipe "apache2::mod_php5"
+    chef.add_recipe "apache2::mod_rewrite"
+    chef.json = {
+        :mysql => {
+              :server_root_password => 'root',
+              :bind_address => '127.0.0.1'
+        }
+    }
+  end
+```
+
 # Creating base boxes
 
 ## Creating base boxes
@@ -932,6 +1036,12 @@ Sometimes, the available base boxes just aren't good enough...
 
 # That's it!
 
+## What I didn't cover
+
+* Provisioning with Chef
+* Security (SELinux, firewall)
+* Testing
+
 ## Thank you!
 
 Presentation slides: <https://github.com/bertvv/vagrant-presentation>
@@ -945,4 +1055,6 @@ More at:
 <https://www.youtube.com/user/bertvvrhogent/>
 
 [\@bertvanvreckem](https://twitter.com/bertvanvreckem)
+
+![CC-BY](http://i.creativecommons.org/l/by/4.0/88x31.png)
 
