@@ -500,7 +500,7 @@ MySQL is left as an exercise for the reader ;-)
 ```ruby
 config.vm.define 'box001' do |node|
   [...]
-  node.vm.provisioning 'ansible' do |ansible|
+  node.vm.provision 'ansible' do |ansible|
     ansible.playbook = 'ansible/site.yml'
   end
 end

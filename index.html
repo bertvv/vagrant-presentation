@@ -526,7 +526,7 @@ EOF</code></pre>
 <h1>Vagrant configuration</h1>
 <pre class="sourceCode ruby"><code class="sourceCode ruby">config.vm.define <span class="st">&#39;box001&#39;</span> <span class="kw">do</span> |node|
   [...]
-  node.vm.provisioning <span class="st">&#39;ansible&#39;</span> <span class="kw">do</span> |ansible|
+  node.vm.provision <span class="st">&#39;ansible&#39;</span> <span class="kw">do</span> |ansible|
     ansible.playbook = <span class="st">&#39;ansible/site.yml&#39;</span>
   <span class="kw">end</span>
 <span class="kw">end</span></code></pre>
