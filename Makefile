@@ -23,9 +23,20 @@ $(REVEAL_JS_DIR):
 ## Cleanup
 clean:
 	rm -f *.html
+	rm -f *.pdf
 
 ## Thorough cleanup (also removes reveal.js)
 mrproper: clean
 	rm -rf $(REVEAL_JS_DIR)
 
 all: index.html
+
+vagrant-tutorial-handouts.pdf: vagrant-tutorial.md
+	pandoc --variable mainfont="DejaVu Sans" \
+		--variable monofont="DejaVu Sans Mono" \
+		--variable fontsize=11pt \
+		--variable geometry:margin=1.5cm \
+		-f markdown  $< \
+		--latex-engine=lualatex \
+		-o $@
+
