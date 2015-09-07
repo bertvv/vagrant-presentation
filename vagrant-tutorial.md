@@ -1,16 +1,15 @@
 % Vagrant tutorial
 % Bert Van Vreckem
-% LOADays, 5-6 April 2014
+% 2015-09-07
 
 ## Whoami
 
 *Bert Van Vreckem*
 
-* Lecturer ICT at University College Ghent
+* Lecturer ICT at University College Ghent and CVO Panta Rhei
     * Mainly Linux & open source
     * Coordinator Bachelor thesises
 * [\@bertvanvreckem](https://twitter.com/bertvanvreckem/)
-* [+BertVanVreckem](https://plus.google.com/u/0/115779954316390709355)
 * <http://be.linkedin.com/in/bertvanvreckem/>
 * <http://youtube.com/user/bertvvhogent/>
 * <http://hogentsysadmin.wordpress.com/>
@@ -23,7 +22,7 @@
 * Getting base boxes
 * Configuring boxes
 * Provisioning
-    * shell, Ansible, Puppet
+    * Shell, Ansible
     * setting up a LAMP stack
 * Creating base boxes
 
@@ -60,20 +59,19 @@
 ## Assumptions
 
 * Git
-* Vagrant 1.5.1
-* VirtualBox 4.3.10
+* Vagrant 1.7.4
+* VirtualBox 4.3 or newer
     * default Host-only network (192.168.56.0/24)
-* `librarian-puppet`
 
 ```console
 $ vagrant --version
-Vagrant 1.5.1
+Vagrant 1.7.4
 $ VBoxHeadless --version
-Oracle VM VirtualBox Headless Interface 4.3.10
-(C) 2008-2014 Oracle Corporation
+Oracle VM VirtualBox Headless Interface 4.3.30
+(C) 2008-2015 Oracle Corporation
 All rights reserved.
 
-4.3.10r93012
+4.3.30_RPMFusionr10610
 $ ifconfig vboxnet0
 => 192.168.56.1
 ```
@@ -82,15 +80,17 @@ $ ifconfig vboxnet0
 
 * Clone the repository
   `git clone git@github.com:bertvv/vagrant-example.git`
-* When the slides mention "`checkpoint-nn`", you can do
+* To get the code at certain points in the presentation, do:
   `git checkout tags/checkpoint-nn`
+
+(sorry, the code is no longer up-to-date)
 
 # Getting up and running
 
 ## Minimal default setup:
 
 ```bash
-$ vagrant init hashicorp/precise32
+$ vagrant init centos/7
 $ vagrant up
 $ vagrant ssh
 ```
@@ -99,7 +99,12 @@ $ vagrant ssh
 
 
 ```bash
-$ vagrant init hashicorp/precise32
+$ vagrant init centos/7
+A `Vagrantfile` has been placed in this directory. You are now
+ready to `vagrant up` your first virtual environment! Please read
+the comments in the Vagrantfile as well as documentation on
+`vagrantup.com` for more information on using Vagrant.
+
 ```
 
 A *Vagrantfile* is created (that's all!)
@@ -109,53 +114,66 @@ A *Vagrantfile* is created (that's all!)
 ```bash
 $ vagrant up
 Bringing machine 'default' up with 'virtualbox' provider...
-==> default: Box 'hashicorp/precise32' could not be found. Attempting to find and install...
+==> default: Box 'centos/7' could not be found. Attempting to find and install...
     default: Box Provider: virtualbox
     default: Box Version: >= 0
-==> default: Loading metadata for box 'hashicorp/precise32'
-    default: URL: https://vagrantcloud.com/hashicorp/precise32
-==> default: Adding box 'hashicorp/precise32' (v1.0.0) for provider: virtualbox
-    default: Downloading: https://vagrantcloud.com/hashicorp/precise32/version/1/provider/virtualbox.box
-==> default: Successfully added box 'hashicorp/precise32' (v1.0.0) for 'virtualbox'!
-==> default: Importing base box 'hashicorp/precise32'...
+==> default: Loading metadata for box 'centos/7'
+    default: URL: https://atlas.hashicorp.com/centos/7
+==> default: Adding box 'centos/7' (v1505.01) for provider: virtualbox
+    default: Downloading: https://atlas.hashicorp.com/centos/boxes/7/versions/1505.01/providers/virtualbox.box
+==> default: Box download is resuming from prior download progress
+==> default: Successfully added box 'centos/7' (v1505.01) for 'virtualbox'!
+==> default: Importing base box 'centos/7'...
 ==> default: Matching MAC address for NAT networking...
-==> default: Checking if box 'hashicorp/precise32' is up to date...
-==> default: Setting the name of the VM: example_default_1395996714768_3176
+==> default: Checking if box 'centos/7' is up to date...
+==> default: Setting the name of the VM: test_default_1441636487571_53914
+==> default: Fixed port collision for 22 => 2222. Now on port 2200.
 ==> default: Clearing any previously set network interfaces...
 ==> default: Preparing network interfaces based on configuration...
     default: Adapter 1: nat
-==> default: Forwarding ports...
-    default: 22 => 2222 (adapter 1)
 ```
 
 -------------------
 
 
 ```bash
+==> default: Forwarding ports...
+    default: 22 => 2200 (adapter 1)
 ==> default: Booting VM...
 ==> default: Waiting for machine to boot. This may take a few minutes...
-    default: SSH address: 127.0.0.1:2222
+    default: SSH address: 127.0.0.1:2200
     default: SSH username: vagrant
     default: SSH auth method: private key
+    default: Warning: Connection timeout. Retrying...
+    default: 
+    default: Vagrant insecure key detected. Vagrant will automatically replace
+    default: this with a newly generated keypair for better security.
+    default: 
+    default: Inserting generated public key within guest...
+    default: Removing insecure key from the guest if it's present...
+    default: Key inserted! Disconnecting and reconnecting using new SSH key...
 ==> default: Machine booted and ready!
 ==> default: Checking for guest additions in VM...
-    default: The guest additions on this VM do not match the installed version of
-    default: VirtualBox! In most cases this is fine, but in rare cases it can
-    default: prevent things such as shared folders from working properly. If you see
-    default: shared folder errors, please make sure the guest additions within the
-    default: virtual machine match the version of VirtualBox you have installed on
-    default: your host and reload your VM.
+```
+
+-------------------
+
+```bash
+    default: No guest additions were detected on the base box for this VM! Guest
+    default: additions are required for forwarded ports, shared folders, host only
+    default: networking, and more. If SSH fails on this machine, please install
+    default: the guest additions and repackage the box to continue.
     default: 
-    default: Guest Additions Version: 4.2.0
-    default: VirtualBox Version: 4.3
-==> default: Mounting shared folders...
-    default: /vagrant => /home/bert/CfgMgmt/vagrant-example
+    default: This is not an error message; everything may continue to work properly,
+    default: in which case you may ignore this message.
+==> default: Installing rsync to the VM...
+==> default: Rsyncing folder: /home/bert/Downloads/test/ => /home/vagrant/sync
 ```
 
 ## What happens under the hood?
 
 ```bash
-$ vagrant init hashicorp/precise32
+$ vagrant up
 ```
 
 * The base box is downloaded and stored locally
@@ -171,55 +189,49 @@ You now have a working VM, ready for use:
 
 ```
 $ vagrant ssh
-Welcome to Ubuntu 12.04 LTS (GNU/Linux 3.2.0-23-generic-pae i686)
+[vagrant@localhost ~]$ cat /etc/redhat-release 
+CentOS Linux release 7.1.1503 (Core) 
+[vagrant@localhost ~]$ 
 
- * Documentation:  https://help.ubuntu.com/
-Welcome to your Vagrant-built virtual machine.
-Last login: Fri Sep 14 06:22:31 2012 from 10.0.2.2
-vagrant@precise32:~$ 
 ```
+
 # Configuring Vagrant boxes
 
 ## Vagrantfile
 
-Minimal Vagrantfile (`checkpoint-01`):
+Minimal Vagrantfile:
 
 ```ruby
 VAGRANTFILE_API_VERSION = '2'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = 'hashicorp/precise32'
+  config.vm.box = 'centos/7'
 end
 ```
 
 Vagrantfile = Ruby
 
-. . .
-
-This is Ubuntu 12.04 LTS 32 bit,
-
-Let's say we want CentOS 6.5 64 bit
-
 ## Finding base boxes
 
-* <https://vagrantcloud.com/> (since 1.5)
-* <http://vagrantbox.es/> (pre-1.5 boxes)
+* Hosted by Hashicorp: <https://atlas.hashicorp.com/>
+* 3rd party repository: <http://vagrantbox.es/>
 
 ## Using another base box
 
-From the command line (Vagrant cloud):
+From the command line (Published on Atlas):
 
 ```bash
-$ vagrant init alphainternational/centos-6.5-x64
+$ vagrant box add centos/7
+$ vagrant init centos/7
 ```
 . . .
 
-From the command line ("old", pre-1.5 style):
+From the command line (Box not on Atlas):
 
 ```bash
-$ vagrant box add --name centos65 \
-  http://packages.vstone.eu/vagrant-boxes/centos-6.x-64bit-latest.box
-$ vagrant init centos65
+$ vagrant box add --name centos71-nocm \
+  https://tinfbo2.hogent.be/pub/vm/centos71-nocm-1.0.16.box
+$ vagrant init centos71-nocm
 ```
 . . .
 
@@ -229,9 +241,9 @@ In your Vagrantfile (only applies to "old" style):
 VAGRANTFILE_API_VERSION = '2'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = 'centos65'
+  config.vm.box = 'centos71-nocm'
   config.vm.box_url =
-    'http://packages.vstone.eu/vagrant-boxes/centos-6.x-64bit-latest.box'
+    'https://tinfbo2.hogent.be/pub/vm/centos71-nocm-1.0.16.box'
 end
 ```
 
@@ -249,8 +261,6 @@ $ vagrant ssh
 
 ## Configuring the VM
 
-(`checkpoint-02`)
-
 ```{.ruby .numberLines}
 VAGRANTFILE_API_VERSION = '2'
 
@@ -259,7 +269,7 @@ HOST_NAME = 'box001'
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.hostname = HOST_NAME
-  config.vm.box = 'alphainternational/centos-6.5-x64'
+  config.vm.box = 'centos/7'
   config.vm.network :private_network,
     ip: '192.168.56.65',
     netmask: '255.255.255.0'
@@ -316,8 +326,6 @@ $ vagrant ssh box001
 
 ## Setup with multiple VMs: Example
 
-(`checkpoint-03`)
-
 ```{.ruby .numberLines}
 VAGRANTFILE_API_VERSION = '2'
 
@@ -325,7 +333,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define 'box001' do |node|
     node.vm.hostname = 'box001'
-    node.vm.box = 'alphainternational/centos-6.5-x64'
+    node.vm.box = 'centos/7'
     node.vm.network :private_network,
       ip: '192.168.56.65',
       netmask: '255.255.255.0'
@@ -341,7 +349,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 ```{.ruby .numberLines startFrom="16"}
   config.vm.define 'box002' do |node|
     node.vm.hostname = 'box002'
-    node.vm.box = 'alphainternational/centos-6.5-x64'
+    node.vm.box = 'centos/7'
     node.vm.network :private_network,
       ip: '192.168.56.66',
       netmask: '255.255.255.0'
@@ -355,8 +363,6 @@ end
 
 ## Setup with multiple VMs: Example (cont'd)
 
-Don't repeat yourself! (`checkpoint-04`)
-
 ```{.ruby .numberLines}
 hosts = [ { name: 'box001', ip: '192.168.56.65' },
           { name: 'box002', ip: '192.168.56.66' }]
@@ -365,7 +371,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   hosts.each do |host|
     config.vm.define host[:name] do |node|
       node.vm.hostname = host[:name]
-      node.vm.box = 'alphainternational/centos-6.5-x64'
+      node.vm.box = 'centos/7'
       node.vm.network :private_network,
         ip: host[:ip],
         netmask: '255.255.255.0'
@@ -426,8 +432,6 @@ Put the script into the same folder as `Vagrantfile`
 
 ## Provisioning script
 
-(`checkpoint-05`)
-
 Installs Apache and PHP
 
 ```bash
@@ -448,8 +452,6 @@ EOF
 MySQL is left as an exercise for the reader ;-)
 
 ## Synced folders
-
-(`checkpoint-06`)
 
 * Add to your `Vagrantfile`:
 
@@ -521,15 +523,13 @@ Then, database on a separate machine
 
 ## Vagrantfile
 
-(`checkpoint-07`)
-
 ```{.ruby .numberLines}
 VAGRANTFILE_API_VERSION = '2'
 hosts = [ { name: 'box001', ip: '192.168.56.65' },
           { name: 'box002', ip: '192.168.56.66' } ]
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = 'alphainternational/centos-6.5-x64'
+  config.vm.box = 'centos/7'
   hosts.each do |host|
     config.vm.define host[:name] do |node|
       node.vm.hostname = host[:name]
@@ -681,8 +681,6 @@ In production, just use a different inventory file!
 
 ## Move database to another box
 
-(`checkpoint-08`)
-
 What should change?
 
 . . .
@@ -717,246 +715,6 @@ What should change?
 ```
 
 This should be easy to automate
-
-# Provisioning with Puppet
-
-## Puppet
-
-<http://puppetlabs.com/>
-
-* One of the market leaders in configuration management
-* Has its own configuration language
-* Many reusable modules available
-* Needs an agent on hosts under control
-* Usually set up with a central server (puppet master)
-* Puppet should be already on your base box!
-
-. . .
-
-Do I have to introduce Puppet at all?
-
-## Vagrant configuration
-
-```ruby
-config.vm.define HOST_NAME do |node|
-  node.vm.synced_folder 'puppet', '/etc/puppet'
-  node.vm.provision 'puppet' do |puppet|
-    puppet.manifests_path = 'puppet/manifests'
-    puppet.manifest_file = 'site.pp'
-  end
-end
-```
-Pro tips:
-
-* The `synced_folder` directive makes Puppet "just work"
-    * No other directives needed (e.g. `module_path`, `manifest_path`)
-    * Installing files outside of modules
-    * Same `hiera.yml` for Vagrant and production
-    * Easier to reuse in production environment
-* Mimic Puppet directory structure and best practices
-
-## Let's build a LAMP stack!
-
-## Vagrantfile
-
-(`checkpoint-09`)
-
-```{.ruby .numberLines}
-VAGRANTFILE_API_VERSION = '2'
-HOST_NAME = 'box001'
-DOMAIN = 'example.com'
-HOST_IP = '192.168.56.65'
-
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = 'alphainternational/centos-6.5-x64'
-  config.vm.define HOST_NAME do |node|
-    node.vm.hostname = "#{HOST_NAME}.#{DOMAIN}"
-    node.vm.network :private_network,
-      ip: HOST_IP,
-      netmask: '255.255.255.0'
-    node.vm.synced_folder 'html', '/var/www/html'
-    node.vm.synced_folder 'puppet', '/etc/puppet'
-```
-
-## Vagrantfile (cont'd)
-
-```{.ruby .numberLines}
-    node.vm.provider :virtualbox do |vb|
-      vb.name = HOST_NAME
-      vb.customize ['modifyvm', :id, '--memory', 256]
-    end
-
-    node.vm.provision 'puppet' do |puppet|
-      puppet.manifests_path = 'puppet/manifests'
-      puppet.manifest_file = 'site.pp'
-    end
-  end
-end
-
-```
-
-## Puppet project structure
-
-```
-$ tree -I modules --prune puppet/
-puppet/
-|-- manifests
-|   |-- nodes
-|   |   |-- box001.pp
-|   |   `-- default.pp
-|   `-- site.pp
-`-- Puppetfile
-```
-
-## Main Puppet files
-
-```puppet
-# file manifests/site.pp
-
-# Load node definitions
-import 'nodes/*'
-```
-
-```puppet
-# file manifests/nodes/default.pp
-
-node default {
-  notice("I'm node ${::hostname} with IP ${::ipaddress_eth1}")
-
-}
-```
-
-## Managing 3rd party modules
-
-Here, we use librarian-puppet
-
-```
-# Puppetfile -- Configuration for librarian-puppet
-# Bootstrap by running `librarian-puppet init`
-
-forge "http://forge.puppetlabs.com"
-
-mod "puppetlabs/stdlib"
-mod "puppetlabs/concat"
-
-mod "puppetlabs/apache"
-mod "puppetlabs/mysql"
-```
-
-Working with Git submodules is also common, e.g.
-
-```bash
-$ git submodule add git@github.com:puppetlabs/puppetlabs-mysql.git modules/mysql
-$ cd modules/mysql
-$ git checkout tags/2.2.3
-```
-
-## Definition of `box001`
-
-```{.puppet .numberLines}
-# file manifests/nodes/box001.pp
-
-node box001 inherits default {
-  # Apache and PHP
-  class { 'apache': }
-  class { 'apache::mod::php': }
-
-  package { [ 'php-mysql', 'php-xml' ]:
-    ensure => installed,
-  }
-
-  # MySQL
-  include '::mysql::server'
-
-  mysql::db { 'appdb':
-    user     => 'dbusr',
-    password => 'vaygDeesh1',
-    host     => 'localhost',
-  }
-
-}
-```
-
-## Development vs Production
-
-(`checkpoint-10`)
-
-How to handle differences between development and production?
-
-Puppet's answer: Hiera
-
-## Hiera configuration
-
-`puppet/hiera.yaml`:
-
-```yaml
----
-:backends:
-  - yaml
-:hierarchy:
-  - '%{::environment}/%{::clientcert}'
-  - 'common'
-:yaml:
-  :datadir: '/etc/puppet/hiera'
-```
-
-```
-$ tree puppet/hiera
-puppet/hiera
-|-- common.yaml
-|-- development
-|   `-- box001.example.com.yaml
-`-- production
-    `-- box001.example.com.yaml
-```
-
-## Hiera data
-
-```yaml
----
-# file hiera/common.yaml
-mysql::host: localhost
-```
-
-```yaml
----
-# puppet/hiera/development/box001.example.com.yaml
-mysql::appdb: 'appdb'
-mysql::user: 'dbusr'
-mysql::password: 'letmein'
-```
-
-```yaml
----
-# file puppet/hiera/production/box001.example.com.yaml
-mysql::appdb: 'db72437'
-mysql::user:  'u440380'
-mysql::password: 'ifwoHaffEtHafwivIj7'
-```
-
-## Using Hiera data
-
-`Vagrantfile:`
-
-```ruby
-node.vm.provision 'puppet' do |puppet|
-  puppet.manifests_path = 'puppet/manifests'
-  puppet.manifest_file = 'site.pp'
-  puppet.options = [ '--environment development' ]
-end
-```
-
-`puppet/manifests/nodes/box001.pp`
-
-```puppet
-  $appdb = hiera('mysql::appdb')
-
-  mysql::db { $appdb:
-    user     => hiera('mysql::user'),
-    password => hiera('mysql::password'),
-    host     => hiera('mysql::host'),
-  }
-```
 
 # Best practices
 
@@ -996,6 +754,35 @@ end
     }
   end
 ```
+# One `Vagrantfile` to rule them all
+
+## A reusable Vagrantfile
+
+See <https://github.com/bertvv/ansible-skeleton>
+
+- The `Vagrantfile` should never be changed
+- Host definitions in a Yaml file:
+
+## Example
+
+```Yaml
+- name: srv001
+  ip: 192.168.56.10
+
+- name: srv002
+  box: fedora22-nocm
+  box_url: https://tinfbo2.hogent.be/pub/vm/fedora22-nocm-1.0.15.box
+  synced_folders:
+    - src: test
+      dest: /tmp/test
+    - src: www
+      dest: /var/www/html
+      options:
+        :create: true
+        :owner: root
+        :group: root
+        :mount_options: ['dmode=0755', 'fmode=0644']
+```
 
 # Creating base boxes
 
@@ -1031,27 +818,20 @@ Sometimes, the available base boxes just aren't good enough...
     * Automates installation from ISO
 * Post-installation scripts
     * e.g. Configure for Vagrant, install Puppet, clean up yum repository, zerodisk (smaller disk images)
-* Find loads of Packer templates at <https://github.com/misheska/basebox-packer>
-    * Cr*p, only for Chef & Salt...
+* Find loads of awesome Packer templates at <https://github.com/boxcutter>
+    * Ubuntu, Debian, CentOS, Fedora, Windows, ...
 
 # That's it!
-
-## What I didn't cover
-
-* Provisioning with Chef
-* Security (SELinux, firewall)
-* Testing
 
 ## Thank you!
 
 Presentation slides: <https://github.com/bertvv/vagrant-presentation>
 
-Code: <https://github.com/bertvv/vagrant-example>
+Code (not up-to-date): <https://github.com/bertvv/vagrant-example>
 
 More at:
 
 <https://github.com/bertvv/>
-<https://bitbucket.org/bertvanvreckem/>
 <https://www.youtube.com/user/bertvvrhogent/>
 
 [\@bertvanvreckem](https://twitter.com/bertvanvreckem)

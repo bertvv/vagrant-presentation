@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="generator" content="pandoc">
   <meta name="author" content="Bert Van Vreckem" />
+  <meta name="dcterms.date" content="2015-09-07" />
   <title>Vagrant tutorial</title>
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -30,10 +31,19 @@ code > span.fu { color: #06287e; }
 code > span.er { color: #ff0000; font-weight: bold; }
     </style>
     <link rel="stylesheet" href="reveal.js/css/theme/simple.css" id="theme">
-  <link rel="stylesheet" media="print" href="reveal.js/css/print/pdf.css" />
-  <!--[if lt IE 9]>
-  <script src="reveal.js/lib/js/html5shiv.js"></script>
-  <![endif]-->
+    <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+    <script>
+      if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+      }
+    </script>
+    <!--[if lt IE 9]>
+    <script src="reveal.js/lib/js/html5shiv.js"></script>
+    <![endif]-->
 </head>
 <body>
   <div class="reveal">
@@ -42,23 +52,22 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <section>
     <h1 class="title">Vagrant tutorial</h1>
     <h2 class="author">Bert Van Vreckem</h2>
-    <h3 class="date">LOADays, 5-6 April 2014</h3>
+    <h3 class="date">2015-09-07</h3>
 </section>
 
 <section id="whoami" class="slide level2">
 <h1>Whoami</h1>
 <p><em>Bert Van Vreckem</em></p>
 <ul>
-<li>Lecturer ICT at University College Ghent
+<li>Lecturer ICT at University College Ghent and CVO Panta Rhei
 <ul>
 <li>Mainly Linux &amp; open source</li>
 <li>Coordinator Bachelor thesises</li>
 </ul></li>
 <li><a href="https://twitter.com/bertvanvreckem/">@bertvanvreckem</a></li>
-<li><a href="https://plus.google.com/u/0/115779954316390709355">+BertVanVreckem</a></li>
-<li><a href="http://be.linkedin.com/in/bertvanvreckem/">http://be.linkedin.com/in/bertvanvreckem/</a></li>
-<li><a href="http://youtube.com/user/bertvvhogent/">http://youtube.com/user/bertvvhogent/</a></li>
-<li><a href="http://hogentsysadmin.wordpress.com/">http://hogentsysadmin.wordpress.com/</a></li>
+<li><a href="http://be.linkedin.com/in/bertvanvreckem/" class="uri">http://be.linkedin.com/in/bertvanvreckem/</a></li>
+<li><a href="http://youtube.com/user/bertvvhogent/" class="uri">http://youtube.com/user/bertvvhogent/</a></li>
+<li><a href="http://hogentsysadmin.wordpress.com/" class="uri">http://hogentsysadmin.wordpress.com/</a></li>
 </ul>
 </section>
 <section id="have-a-questionremark-please-interrupt-me" class="slide level2">
@@ -72,7 +81,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li>Configuring boxes</li>
 <li>Provisioning
 <ul>
-<li>shell, Ansible, Puppet</li>
+<li>Shell, Ansible</li>
 <li>setting up a LAMP stack</li>
 </ul></li>
 <li>Creating base boxes</li>
@@ -80,7 +89,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 </section>
 <section><section id="introduction" class="titleslide slide level1"><h1>Introduction</h1></section><section id="what-is-vagrant" class="slide level2">
 <h1>What is Vagrant?</h1>
-<p><a href="http://www.vagrantup.com/">http://www.vagrantup.com/</a></p>
+<p><a href="http://www.vagrantup.com/" class="uri">http://www.vagrantup.com/</a></p>
 <ul>
 <li>Written by <a href="https://twitter.com/mitchellh">Mitchell Hashimoto</a></li>
 <li>Command line tool</li>
@@ -119,83 +128,97 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <h1>Assumptions</h1>
 <ul>
 <li>Git</li>
-<li>Vagrant 1.5.1</li>
-<li>VirtualBox 4.3.10
+<li>Vagrant 1.7.4</li>
+<li>VirtualBox 4.3 or newer
 <ul>
 <li>default Host-only network (192.168.56.0/24)</li>
 </ul></li>
-<li><code>librarian-puppet</code></li>
 </ul>
 <pre class="console"><code>$ vagrant --version
-Vagrant 1.5.1
+Vagrant 1.7.4
 $ VBoxHeadless --version
-Oracle VM VirtualBox Headless Interface 4.3.10
-(C) 2008-2014 Oracle Corporation
+Oracle VM VirtualBox Headless Interface 4.3.30
+(C) 2008-2015 Oracle Corporation
 All rights reserved.
 
-4.3.10r93012
+4.3.30_RPMFusionr10610
 $ ifconfig vboxnet0
 =&gt; 192.168.56.1</code></pre>
 </section><section id="try-it-yourself" class="slide level2">
 <h1>Try it yourself</h1>
 <ul>
 <li>Clone the repository <code>git clone git@github.com:bertvv/vagrant-example.git</code></li>
-<li>When the slides mention &quot;<code>checkpoint-nn</code>&quot;, you can do <code>git checkout tags/checkpoint-nn</code></li>
+<li>To get the code at certain points in the presentation, do: <code>git checkout tags/checkpoint-nn</code></li>
 </ul>
+<p>(sorry, the code is no longer up-to-date)</p>
 </section></section>
 <section><section id="getting-up-and-running" class="titleslide slide level1"><h1>Getting up and running</h1></section><section id="minimal-default-setup" class="slide level2">
 <h1>Minimal default setup:</h1>
-<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> init hashicorp/precise32
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> init centos/7
 $ <span class="kw">vagrant</span> up
 $ <span class="kw">vagrant</span> ssh</code></pre>
 </section><section id="what-happens-under-the-hood" class="slide level2">
 <h1>What happens under the hood?</h1>
-<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> init hashicorp/precise32</code></pre>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> init centos/7
+<span class="kw">A</span> <span class="kw">`Vagrantfile`</span> has been placed in this directory. You are now
+<span class="kw">ready</span> to <span class="kw">`vagrant</span> up<span class="kw">`</span> your first virtual environment! Please read
+<span class="kw">the</span> comments in the Vagrantfile as well as documentation on
+<span class="kw">`vagrantup.com`</span> <span class="kw">for</span> <span class="kw">more</span> information on using Vagrant.</code></pre>
 <p>A <em>Vagrantfile</em> is created (that's all!)</p>
 </section><section id="what-happens-under-the-hood-1" class="slide level2">
 <h1>What happens under the hood?</h1>
 <pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> up
 <span class="kw">Bringing</span> machine <span class="st">&#39;default&#39;</span> up with <span class="st">&#39;virtualbox&#39;</span> provider...
-==<span class="kw">&gt;</span> <span class="kw">default</span>: Box <span class="st">&#39;hashicorp/precise32&#39;</span> could not be found. Attempting to find and install...
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Box <span class="st">&#39;centos/7&#39;</span> could not be found. Attempting to find and install...
     <span class="kw">default</span>: Box Provider: virtualbox
     <span class="kw">default</span>: Box Version: <span class="kw">&gt;</span>= 0
-==<span class="kw">&gt;</span> <span class="kw">default</span>: Loading metadata for box <span class="st">&#39;hashicorp/precise32&#39;</span>
-    <span class="kw">default</span>: URL: https://vagrantcloud.com/hashicorp/precise32
-==<span class="kw">&gt;</span> <span class="kw">default</span>: Adding box <span class="st">&#39;hashicorp/precise32&#39;</span> (v1.0.0) <span class="kw">for</span> <span class="kw">provider</span>: virtualbox
-    <span class="kw">default</span>: Downloading: https://vagrantcloud.com/hashicorp/precise32/version/1/provider/virtualbox.box
-==<span class="kw">&gt;</span> <span class="kw">default</span>: Successfully added box <span class="st">&#39;hashicorp/precise32&#39;</span> (v1.0.0) <span class="kw">for</span> <span class="st">&#39;virtualbox&#39;</span>!
-==<span class="kw">&gt;</span> <span class="kw">default</span>: Importing base box <span class="st">&#39;hashicorp/precise32&#39;</span>...
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Loading metadata for box <span class="st">&#39;centos/7&#39;</span>
+    <span class="kw">default</span>: URL: https://atlas.hashicorp.com/centos/7
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Adding box <span class="st">&#39;centos/7&#39;</span> (v1505.01) <span class="kw">for</span> <span class="kw">provider</span>: virtualbox
+    <span class="kw">default</span>: Downloading: https://atlas.hashicorp.com/centos/boxes/7/versions/1505.01/providers/virtualbox.box
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Box download is resuming from prior download progress
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Successfully added box <span class="st">&#39;centos/7&#39;</span> (v1505.01) <span class="kw">for</span> <span class="st">&#39;virtualbox&#39;</span>!
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Importing base box <span class="st">&#39;centos/7&#39;</span>...
 ==<span class="kw">&gt;</span> <span class="kw">default</span>: Matching MAC address for NAT networking...
-==<span class="kw">&gt;</span> <span class="kw">default</span>: Checking if box <span class="st">&#39;hashicorp/precise32&#39;</span> is up to date...
-==<span class="kw">&gt;</span> <span class="kw">default</span>: Setting the name of the VM: example_default_1395996714768_3176
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Checking if box <span class="st">&#39;centos/7&#39;</span> is up to date...
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Setting the name of the VM: test_default_1441636487571_53914
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Fixed port collision for 22 =<span class="kw">&gt;</span> 2222. Now on port 2200.
 ==<span class="kw">&gt;</span> <span class="kw">default</span>: Clearing any previously set network interfaces...
 ==<span class="kw">&gt;</span> <span class="kw">default</span>: Preparing network interfaces based on configuration...
-    <span class="kw">default</span>: Adapter 1: nat
-==<span class="kw">&gt;</span> <span class="kw">default</span>: Forwarding ports...
-    <span class="kw">default</span>: 22 =<span class="kw">&gt;</span> 2222 (adapter 1)</code></pre>
+    <span class="kw">default</span>: Adapter 1: nat</code></pre>
 </section><section class="slide level2">
 
-<pre class="sourceCode bash"><code class="sourceCode bash">==<span class="kw">&gt;</span> <span class="kw">default</span>: Booting VM...
+<pre class="sourceCode bash"><code class="sourceCode bash">==<span class="kw">&gt;</span> <span class="kw">default</span>: Forwarding ports...
+    <span class="kw">default</span>: 22 =<span class="kw">&gt;</span> 2200 (adapter 1)
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Booting VM...
 ==<span class="kw">&gt;</span> <span class="kw">default</span>: Waiting for machine to boot. This may take a few minutes...
-    <span class="kw">default</span>: SSH address: 127.0.0.1:2222
+    <span class="kw">default</span>: SSH address: 127.0.0.1:2200
     <span class="kw">default</span>: SSH username: vagrant
     <span class="kw">default</span>: SSH auth method: private key
-==<span class="kw">&gt;</span> <span class="kw">default</span>: Machine booted and ready!
-==<span class="kw">&gt;</span> <span class="kw">default</span>: Checking for guest additions in VM...
-    <span class="kw">default</span>: The guest additions on this VM do not match the installed version of
-    <span class="kw">default</span>: VirtualBox! In most cases this is fine, but in rare cases it can
-    <span class="kw">default</span>: prevent things such as shared folders from working properly. If you see
-    <span class="kw">default</span>: shared folder errors, please make sure the guest additions within the
-    <span class="kw">default</span>: virtual machine match the version of VirtualBox you have installed on
-    <span class="kw">default</span>: your host and reload your VM.
+    <span class="kw">default</span>: Warning: Connection timeout. Retrying...
     <span class="kw">default</span>: 
-    <span class="kw">default</span>: Guest Additions Version: 4.2.0
-    <span class="kw">default</span>: VirtualBox Version: 4.3
-==<span class="kw">&gt;</span> <span class="kw">default</span>: Mounting shared folders...
-    <span class="kw">default</span>: /vagrant =<span class="kw">&gt;</span> /home/bert/CfgMgmt/vagrant-example</code></pre>
+    <span class="kw">default</span>: Vagrant insecure key detected. Vagrant will automatically replace
+    <span class="kw">default</span>: this with a newly generated keypair for better security.
+    <span class="kw">default</span>: 
+    <span class="kw">default</span>: Inserting generated public key within guest...
+    <span class="kw">default</span>: Removing insecure key from the guest if it<span class="st">&#39;s present...</span>
+<span class="st">    default: Key inserted! Disconnecting and reconnecting using new SSH key...</span>
+<span class="st">==&gt; default: Machine booted and ready!</span>
+<span class="st">==&gt; default: Checking for guest additions in VM...</span></code></pre>
+</section><section class="slide level2">
+
+<pre class="sourceCode bash"><code class="sourceCode bash">    <span class="kw">default</span>: No guest additions were detected on the base box for this VM! Guest
+    <span class="kw">default</span>: additions are required for forwarded ports, shared folders, host only
+    <span class="kw">default</span>: networking, and more. If SSH fails on this machine, please install
+    <span class="kw">default</span>: the guest additions and repackage the box to continue.
+    <span class="kw">default</span>: 
+    <span class="kw">default</span>: This is not an error message<span class="kw">;</span> <span class="kw">everything</span> may continue to work properly,
+    <span class="kw">default</span>: in which case you may ignore this message.
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Installing rsync to the VM...
+==<span class="kw">&gt;</span> <span class="kw">default</span>: Rsyncing folder: /home/bert/Downloads/test/ =<span class="kw">&gt;</span> /home/vagrant/sync</code></pre>
 </section><section id="what-happens-under-the-hood-2" class="slide level2">
 <h1>What happens under the hood?</h1>
-<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> init hashicorp/precise32</code></pre>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> up</code></pre>
 <ul>
 <li>The base box is downloaded and stored locally
 <ul>
@@ -212,50 +235,45 @@ $ <span class="kw">vagrant</span> ssh</code></pre>
 <h1>Done!</h1>
 <p>You now have a working VM, ready for use:</p>
 <pre><code>$ vagrant ssh
-Welcome to Ubuntu 12.04 LTS (GNU/Linux 3.2.0-23-generic-pae i686)
-
- * Documentation:  https://help.ubuntu.com/
-Welcome to your Vagrant-built virtual machine.
-Last login: Fri Sep 14 06:22:31 2012 from 10.0.2.2
-vagrant@precise32:~$ </code></pre>
+[vagrant@localhost ~]$ cat /etc/redhat-release 
+CentOS Linux release 7.1.1503 (Core) 
+[vagrant@localhost ~]$ 
+</code></pre>
 </section></section>
 <section><section id="configuring-vagrant-boxes" class="titleslide slide level1"><h1>Configuring Vagrant boxes</h1></section><section id="vagrantfile" class="slide level2">
 <h1>Vagrantfile</h1>
-<p>Minimal Vagrantfile (<code>checkpoint-01</code>):</p>
+<p>Minimal Vagrantfile:</p>
 <pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="dt">VAGRANTFILE_API_VERSION</span> = <span class="st">&#39;2&#39;</span>
 
 <span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
-  config.vm.box = <span class="st">&#39;hashicorp/precise32&#39;</span>
+  config.vm.box = <span class="st">&#39;centos/7&#39;</span>
 <span class="kw">end</span></code></pre>
 <p>Vagrantfile = Ruby</p>
-<div class="fragment">
-<p>This is Ubuntu 12.04 LTS 32 bit,</p>
-<p>Let's say we want CentOS 6.5 64 bit</p>
-</div>
 </section><section id="finding-base-boxes" class="slide level2">
 <h1>Finding base boxes</h1>
 <ul>
-<li><a href="https://vagrantcloud.com/">https://vagrantcloud.com/</a> (since 1.5)</li>
-<li><a href="http://vagrantbox.es/">http://vagrantbox.es/</a> (pre-1.5 boxes)</li>
+<li>Hosted by Hashicorp: <a href="https://atlas.hashicorp.com/" class="uri">https://atlas.hashicorp.com/</a></li>
+<li>3rd party repository: <a href="http://vagrantbox.es/" class="uri">http://vagrantbox.es/</a></li>
 </ul>
 </section><section id="using-another-base-box" class="slide level2">
 <h1>Using another base box</h1>
-<p>From the command line (Vagrant cloud):</p>
-<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> init alphainternational/centos-6.5-x64</code></pre>
+<p>From the command line (Published on Atlas):</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> box add centos/7
+$ <span class="kw">vagrant</span> init centos/7</code></pre>
 <div class="fragment">
-<p>From the command line (&quot;old&quot;, pre-1.5 style):</p>
-<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> box add --name centos65 \
-  <span class="kw">http</span>://packages.vstone.eu/vagrant-boxes/centos-6.x-64bit-latest.box
-$ <span class="kw">vagrant</span> init centos65</code></pre>
+<p>From the command line (Box not on Atlas):</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">vagrant</span> box add --name centos71-nocm \
+  https://tinfbo2.hogent.be/pub/vm/centos71-nocm-1.0.16.box
+$ <span class="kw">vagrant</span> init centos71-nocm</code></pre>
 </div>
 <div class="fragment">
 <p>In your Vagrantfile (only applies to &quot;old&quot; style):</p>
 <pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="dt">VAGRANTFILE_API_VERSION</span> = <span class="st">&#39;2&#39;</span>
 
 <span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
-  config.vm.box = <span class="st">&#39;centos65&#39;</span>
+  config.vm.box = <span class="st">&#39;centos71-nocm&#39;</span>
   config.vm.box_url =
-    <span class="st">&#39;http://packages.vstone.eu/vagrant-boxes/centos-6.x-64bit-latest.box&#39;</span>
+    <span class="st">&#39;https://tinfbo2.hogent.be/pub/vm/centos71-nocm-1.0.16.box&#39;</span>
 <span class="kw">end</span></code></pre>
 </div>
 </section><section id="applying-the-change" class="slide level2">
@@ -269,7 +287,6 @@ $ <span class="kw">vagrant</span> up
 $ <span class="kw">vagrant</span> ssh</code></pre>
 </section><section id="configuring-the-vm" class="slide level2">
 <h1>Configuring the VM</h1>
-<p>(<code>checkpoint-02</code>)</p>
 <table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
 2
 3
@@ -294,7 +311,7 @@ $ <span class="kw">vagrant</span> ssh</code></pre>
 <span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
 
   config.vm.hostname = <span class="dt">HOST_NAME</span>
-  config.vm.box = <span class="st">&#39;alphainternational/centos-6.5-x64&#39;</span>
+  config.vm.box = <span class="st">&#39;centos/7&#39;</span>
   config.vm.network <span class="st">:private_network</span>,
     ip: <span class="st">&#39;192.168.56.65&#39;</span>,
     netmask: <span class="st">&#39;255.255.255.0&#39;</span>
@@ -308,7 +325,7 @@ $ <span class="kw">vagrant</span> ssh</code></pre>
 <h1>Configuring the VM</h1>
 <p>For more info,</p>
 <ul>
-<li>see the docs at <a href="https://docs.vagrantup.com/">https://docs.vagrantup.com/</a></li>
+<li>see the docs at <a href="https://docs.vagrantup.com/" class="uri">https://docs.vagrantup.com/</a></li>
 <li>or the default <code>Vagrantfile</code></li>
 </ul>
 </section><section id="applying-changes" class="slide level2">
@@ -332,7 +349,6 @@ $ <span class="kw">vagrant</span> up         <span class="co"># Boot *all* defin
 $ <span class="kw">vagrant</span> ssh box001</code></pre>
 </section><section id="setup-with-multiple-vms-example" class="slide level2">
 <h1>Setup with multiple VMs: Example</h1>
-<p>(<code>checkpoint-03</code>)</p>
 <table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
 2
 3
@@ -354,7 +370,7 @@ $ <span class="kw">vagrant</span> ssh box001</code></pre>
 
   config.vm.define <span class="st">&#39;box001&#39;</span> <span class="kw">do</span> |node|
     node.vm.hostname = <span class="st">&#39;box001&#39;</span>
-    node.vm.box = <span class="st">&#39;alphainternational/centos-6.5-x64&#39;</span>
+    node.vm.box = <span class="st">&#39;centos/7&#39;</span>
     node.vm.network <span class="st">:private_network</span>,
       ip: <span class="st">&#39;192.168.56.65&#39;</span>,
       netmask: <span class="st">&#39;255.255.255.0&#39;</span>
@@ -379,7 +395,7 @@ $ <span class="kw">vagrant</span> ssh box001</code></pre>
 27
 </pre></td><td class="sourceCode"><pre><code class="sourceCode ruby">  config.vm.define <span class="st">&#39;box002&#39;</span> <span class="kw">do</span> |node|
     node.vm.hostname = <span class="st">&#39;box002&#39;</span>
-    node.vm.box = <span class="st">&#39;alphainternational/centos-6.5-x64&#39;</span>
+    node.vm.box = <span class="st">&#39;centos/7&#39;</span>
     node.vm.network <span class="st">:private_network</span>,
       ip: <span class="st">&#39;192.168.56.66&#39;</span>,
       netmask: <span class="st">&#39;255.255.255.0&#39;</span>
@@ -391,7 +407,6 @@ $ <span class="kw">vagrant</span> ssh box001</code></pre>
 <span class="kw">end</span></code></pre></td></tr></table>
 </section><section id="setup-with-multiple-vms-example-contd-1" class="slide level2">
 <h1>Setup with multiple VMs: Example (cont'd)</h1>
-<p>Don't repeat yourself! (<code>checkpoint-04</code>)</p>
 <table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
 2
 3
@@ -416,7 +431,7 @@ $ <span class="kw">vagrant</span> ssh box001</code></pre>
   hosts.each <span class="kw">do</span> |host|
     config.vm.define host[<span class="st">:name</span>] <span class="kw">do</span> |node|
       node.vm.hostname = host[<span class="st">:name</span>]
-      node.vm.box = <span class="st">&#39;alphainternational/centos-6.5-x64&#39;</span>
+      node.vm.box = <span class="st">&#39;centos/7&#39;</span>
       node.vm.network <span class="st">:private_network</span>,
         ip: host[<span class="st">:ip</span>],
         netmask: <span class="st">&#39;255.255.255.0&#39;</span>
@@ -464,7 +479,6 @@ $ <span class="kw">vagrant</span> status [host]   <span class="co"># Status of y
 </ul>
 </section><section id="provisioning-script" class="slide level2">
 <h1>Provisioning script</h1>
-<p>(<code>checkpoint-05</code>)</p>
 <p>Installs Apache and PHP</p>
 <pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash -eu</span>
 <span class="co"># provision.sh -- Install Apache and a test PHP script</span>
@@ -481,7 +495,6 @@ EOF</code></pre>
 <p>MySQL is left as an exercise for the reader ;-)</p>
 </section><section id="synced-folders" class="slide level2">
 <h1>Synced folders</h1>
-<p>(<code>checkpoint-06</code>)</p>
 <ul>
 <li><p>Add to your <code>Vagrantfile</code>:</p>
 <pre class="sourceCode ruby"><code class="sourceCode ruby">config.vm.synced_folder <span class="st">&#39;html&#39;</span>, <span class="st">&#39;/var/www/html&#39;</span></code></pre></li>
@@ -512,7 +525,7 @@ EOF</code></pre>
 </section></section>
 <section><section id="provisioning-with-ansible" class="titleslide slide level1"><h1>Provisioning with Ansible</h1></section><section id="ansible" class="slide level2">
 <h1>Ansible</h1>
-<p><a href="http://ansible.com/">http://ansible.com/</a></p>
+<p><a href="http://ansible.com/" class="uri">http://ansible.com/</a></p>
 <ul>
 <li>Configuration management tool written in Python</li>
 <li>Simple configuration (YAML)</li>
@@ -547,7 +560,6 @@ EOF</code></pre>
 <p>Then, database on a separate machine</p>
 </section><section id="vagrantfile-1" class="slide level2">
 <h1>Vagrantfile</h1>
-<p>(<code>checkpoint-07</code>)</p>
 <table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
 2
 3
@@ -577,7 +589,7 @@ hosts = [ { name: <span class="st">&#39;box001&#39;</span>, ip: <span class="st"
           { name: <span class="st">&#39;box002&#39;</span>, ip: <span class="st">&#39;192.168.56.66&#39;</span> } ]
 
 <span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
-  config.vm.box = <span class="st">&#39;alphainternational/centos-6.5-x64&#39;</span>
+  config.vm.box = <span class="st">&#39;centos/7&#39;</span>
   hosts.each <span class="kw">do</span> |host|
     config.vm.define host[<span class="st">:name</span>] <span class="kw">do</span> |node|
       node.vm.hostname = host[<span class="st">:name</span>]
@@ -712,7 +724,7 @@ ansible/
 <p>E.g. <a href="http://www.mediawiki.org/wiki/Download">Mediawiki</a></p>
 <ol type="1">
 <li>Unpack latest mediawiki.tar.gz into <code>html/wiki/</code> directory</li>
-<li>Surf to <a href="http://192.168.56.65/wiki">http://192.168.56.65/wiki</a> and follow instructions</li>
+<li>Surf to <a href="http://192.168.56.65/wiki" class="uri">http://192.168.56.65/wiki</a> and follow instructions</li>
 <li>Enter values from <code>group_vars/all</code> in the install page</li>
 <li>Download <code>LocalSite.php</code> and save in <code>html/wiki/</code></li>
 </ol>
@@ -728,7 +740,6 @@ ansible/
 <p>In production, just use a different inventory file!</p>
 </section><section id="move-database-to-another-box" class="slide level2">
 <h1>Move database to another box</h1>
-<p>(<code>checkpoint-08</code>)</p>
 <p>What should change?</p>
 <div class="fragment">
 <pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
@@ -755,214 +766,6 @@ ansible/
   <span class="fu">mysql_user:</span> name={{ dbuser }} password={{ dbpasswd }}
                 <span class="fu">priv=*.*:</span>ALL host=&#39;%&#39; state=present</code></pre>
 <p>This should be easy to automate</p>
-</section></section>
-<section><section id="provisioning-with-puppet" class="titleslide slide level1"><h1>Provisioning with Puppet</h1></section><section id="puppet" class="slide level2">
-<h1>Puppet</h1>
-<p><a href="http://puppetlabs.com/">http://puppetlabs.com/</a></p>
-<ul>
-<li>One of the market leaders in configuration management</li>
-<li>Has its own configuration language</li>
-<li>Many reusable modules available</li>
-<li>Needs an agent on hosts under control</li>
-<li>Usually set up with a central server (puppet master)</li>
-<li>Puppet should be already on your base box!</li>
-</ul>
-<div class="fragment">
-<p>Do I have to introduce Puppet at all?</p>
-</div>
-</section><section id="vagrant-configuration-1" class="slide level2">
-<h1>Vagrant configuration</h1>
-<pre class="sourceCode ruby"><code class="sourceCode ruby">config.vm.define <span class="dt">HOST_NAME</span> <span class="kw">do</span> |node|
-  node.vm.synced_folder <span class="st">&#39;puppet&#39;</span>, <span class="st">&#39;/etc/puppet&#39;</span>
-  node.vm.provision <span class="st">&#39;puppet&#39;</span> <span class="kw">do</span> |puppet|
-    puppet.manifests_path = <span class="st">&#39;puppet/manifests&#39;</span>
-    puppet.manifest_file = <span class="st">&#39;site.pp&#39;</span>
-  <span class="kw">end</span>
-<span class="kw">end</span></code></pre>
-<p>Pro tips:</p>
-<ul>
-<li>The <code>synced_folder</code> directive makes Puppet &quot;just work&quot;
-<ul>
-<li>No other directives needed (e.g. <code>module_path</code>, <code>manifest_path</code>)</li>
-<li>Installing files outside of modules</li>
-<li>Same <code>hiera.yml</code> for Vagrant and production</li>
-<li>Easier to reuse in production environment</li>
-</ul></li>
-<li>Mimic Puppet directory structure and best practices</li>
-</ul>
-</section><section id="lets-build-a-lamp-stack-1" class="slide level2">
-<h1>Let's build a LAMP stack!</h1>
-</section><section id="vagrantfile-2" class="slide level2">
-<h1>Vagrantfile</h1>
-<p>(<code>checkpoint-09</code>)</p>
-<table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-</pre></td><td class="sourceCode"><pre><code class="sourceCode ruby"><span class="dt">VAGRANTFILE_API_VERSION</span> = <span class="st">&#39;2&#39;</span>
-<span class="dt">HOST_NAME</span> = <span class="st">&#39;box001&#39;</span>
-<span class="dt">DOMAIN</span> = <span class="st">&#39;example.com&#39;</span>
-<span class="dt">HOST_IP</span> = <span class="st">&#39;192.168.56.65&#39;</span>
-
-<span class="dt">Vagrant</span>.configure(<span class="dt">VAGRANTFILE_API_VERSION</span>) <span class="kw">do</span> |config|
-  config.vm.box = <span class="st">&#39;alphainternational/centos-6.5-x64&#39;</span>
-  config.vm.define <span class="dt">HOST_NAME</span> <span class="kw">do</span> |node|
-    node.vm.hostname = <span class="st">&quot;</span><span class="ot">#{</span><span class="dt">HOST_NAME</span><span class="ot">}</span><span class="st">.</span><span class="ot">#{</span><span class="dt">DOMAIN</span><span class="ot">}</span><span class="st">&quot;</span>
-    node.vm.network <span class="st">:private_network</span>,
-      ip: <span class="dt">HOST_IP</span>,
-      netmask: <span class="st">&#39;255.255.255.0&#39;</span>
-    node.vm.synced_folder <span class="st">&#39;html&#39;</span>, <span class="st">&#39;/var/www/html&#39;</span>
-    node.vm.synced_folder <span class="st">&#39;puppet&#39;</span>, <span class="st">&#39;/etc/puppet&#39;</span></code></pre></td></tr></table>
-</section><section id="vagrantfile-contd" class="slide level2">
-<h1>Vagrantfile (cont'd)</h1>
-<table class="sourceCode ruby numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-</pre></td><td class="sourceCode"><pre><code class="sourceCode ruby">    node.vm.provider <span class="st">:virtualbox</span> <span class="kw">do</span> |vb|
-      vb.name = <span class="dt">HOST_NAME</span>
-      vb.customize [<span class="st">&#39;modifyvm&#39;</span>, <span class="st">:id</span>, <span class="st">&#39;--memory&#39;</span>, <span class="dv">256</span>]
-    <span class="kw">end</span>
-
-    node.vm.provision <span class="st">&#39;puppet&#39;</span> <span class="kw">do</span> |puppet|
-      puppet.manifests_path = <span class="st">&#39;puppet/manifests&#39;</span>
-      puppet.manifest_file = <span class="st">&#39;site.pp&#39;</span>
-    <span class="kw">end</span>
-  <span class="kw">end</span>
-<span class="kw">end</span></code></pre></td></tr></table>
-</section><section id="puppet-project-structure" class="slide level2">
-<h1>Puppet project structure</h1>
-<pre><code>$ tree -I modules --prune puppet/
-puppet/
-|-- manifests
-|   |-- nodes
-|   |   |-- box001.pp
-|   |   `-- default.pp
-|   `-- site.pp
-`-- Puppetfile</code></pre>
-</section><section id="main-puppet-files" class="slide level2">
-<h1>Main Puppet files</h1>
-<pre class="puppet"><code># file manifests/site.pp
-
-# Load node definitions
-import &#39;nodes/*&#39;</code></pre>
-<pre class="puppet"><code># file manifests/nodes/default.pp
-
-node default {
-  notice(&quot;I&#39;m node ${::hostname} with IP ${::ipaddress_eth1}&quot;)
-
-}</code></pre>
-</section><section id="managing-3rd-party-modules" class="slide level2">
-<h1>Managing 3rd party modules</h1>
-<p>Here, we use librarian-puppet</p>
-<pre><code># Puppetfile -- Configuration for librarian-puppet
-# Bootstrap by running `librarian-puppet init`
-
-forge &quot;http://forge.puppetlabs.com&quot;
-
-mod &quot;puppetlabs/stdlib&quot;
-mod &quot;puppetlabs/concat&quot;
-
-mod &quot;puppetlabs/apache&quot;
-mod &quot;puppetlabs/mysql&quot;</code></pre>
-<p>Working with Git submodules is also common, e.g.</p>
-<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">git</span> submodule add git@github.com:puppetlabs/puppetlabs-mysql.git modules/mysql
-$ <span class="kw">cd</span> modules/mysql
-$ <span class="kw">git</span> checkout tags/2.2.3</code></pre>
-</section><section id="definition-of-box001" class="slide level2">
-<h1>Definition of <code>box001</code></h1>
-<pre class="puppet numberLines"><code># file manifests/nodes/box001.pp
-
-node box001 inherits default {
-  # Apache and PHP
-  class { &#39;apache&#39;: }
-  class { &#39;apache::mod::php&#39;: }
-
-  package { [ &#39;php-mysql&#39;, &#39;php-xml&#39; ]:
-    ensure =&gt; installed,
-  }
-
-  # MySQL
-  include &#39;::mysql::server&#39;
-
-  mysql::db { &#39;appdb&#39;:
-    user     =&gt; &#39;dbusr&#39;,
-    password =&gt; &#39;vaygDeesh1&#39;,
-    host     =&gt; &#39;localhost&#39;,
-  }
-
-}</code></pre>
-</section><section id="development-vs-production" class="slide level2">
-<h1>Development vs Production</h1>
-<p>(<code>checkpoint-10</code>)</p>
-<p>How to handle differences between development and production?</p>
-<p>Puppet's answer: Hiera</p>
-</section><section id="hiera-configuration" class="slide level2">
-<h1>Hiera configuration</h1>
-<p><code>puppet/hiera.yaml</code>:</p>
-<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
-<span class="fu">:backends:</span>
-  <span class="kw">-</span> yaml
-<span class="fu">:hierarchy:</span>
-  <span class="kw">-</span> <span class="st">&#39;%{::environment}/%{::clientcert}&#39;</span>
-  <span class="kw">-</span> <span class="st">&#39;common&#39;</span>
-<span class="fu">:yaml:</span>
-  <span class="fu">:datadir:</span> <span class="st">&#39;/etc/puppet/hiera&#39;</span></code></pre>
-<pre><code>$ tree puppet/hiera
-puppet/hiera
-|-- common.yaml
-|-- development
-|   `-- box001.example.com.yaml
-`-- production
-    `-- box001.example.com.yaml</code></pre>
-</section><section id="hiera-data" class="slide level2">
-<h1>Hiera data</h1>
-<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
-<span class="co"># file hiera/common.yaml</span>
-<span class="fu">mysql:</span>:host: localhost</code></pre>
-<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
-<span class="co"># puppet/hiera/development/box001.example.com.yaml</span>
-<span class="fu">mysql:</span>:appdb: &#39;appdb&#39;
-<span class="fu">mysql:</span>:user: &#39;dbusr&#39;
-<span class="fu">mysql:</span>:password: &#39;letmein&#39;</code></pre>
-<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="ot">---</span>
-<span class="co"># file puppet/hiera/production/box001.example.com.yaml</span>
-<span class="fu">mysql:</span>:appdb: &#39;db72437&#39;
-<span class="fu">mysql:</span>:user:  &#39;u440380&#39;
-<span class="fu">mysql:</span>:password: &#39;ifwoHaffEtHafwivIj7&#39;</code></pre>
-</section><section id="using-hiera-data" class="slide level2">
-<h1>Using Hiera data</h1>
-<p><code>Vagrantfile:</code></p>
-<pre class="sourceCode ruby"><code class="sourceCode ruby">node.vm.provision <span class="st">&#39;puppet&#39;</span> <span class="kw">do</span> |puppet|
-  puppet.manifests_path = <span class="st">&#39;puppet/manifests&#39;</span>
-  puppet.manifest_file = <span class="st">&#39;site.pp&#39;</span>
-  puppet.options = [ <span class="st">&#39;--environment development&#39;</span> ]
-<span class="kw">end</span></code></pre>
-<p><code>puppet/manifests/nodes/box001.pp</code></p>
-<pre class="puppet"><code>  $appdb = hiera(&#39;mysql::appdb&#39;)
-
-  mysql::db { $appdb:
-    user     =&gt; hiera(&#39;mysql::user&#39;),
-    password =&gt; hiera(&#39;mysql::password&#39;),
-    host     =&gt; hiera(&#39;mysql::host&#39;),
-  }</code></pre>
 </section></section>
 <section><section id="best-practices" class="titleslide slide level1"><h1>Best practices</h1></section><section id="best-practices-1" class="slide level2">
 <h1>Best practices</h1>
@@ -1028,6 +831,30 @@ puppet/hiera
     }
   <span class="kw">end</span></code></pre></td></tr></table>
 </section></section>
+<section><section id="one-vagrantfile-to-rule-them-all" class="titleslide slide level1"><h1>One <code>Vagrantfile</code> to rule them all</h1></section><section id="a-reusable-vagrantfile" class="slide level2">
+<h1>A reusable Vagrantfile</h1>
+<p>See <a href="https://github.com/bertvv/ansible-skeleton" class="uri">https://github.com/bertvv/ansible-skeleton</a></p>
+<ul>
+<li>The <code>Vagrantfile</code> should never be changed</li>
+<li>Host definitions in a Yaml file:</li>
+</ul>
+<pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="fu">name:</span> srv001
+  <span class="fu">ip:</span> 192.168.56.10
+
+<span class="kw">-</span> <span class="fu">name:</span> srv002
+  <span class="fu">box:</span> fedora22-nocm
+  <span class="fu">box_url:</span> https://tinfbo2.hogent.be/pub/vm/fedora22-nocm-1.0.15.box
+  <span class="fu">synced_folders:</span>
+    <span class="kw">-</span> <span class="fu">src:</span> test
+      <span class="fu">dest:</span> /tmp/test
+    <span class="kw">-</span> <span class="fu">src:</span> www
+      <span class="fu">dest:</span> /var/www/html
+      <span class="fu">options:</span>
+        <span class="fu">:create:</span> true
+        <span class="fu">:owner:</span> root
+        <span class="fu">:group:</span> root
+        <span class="fu">:mount_options:</span> <span class="kw">[</span><span class="st">&#39;dmode=0755&#39;</span><span class="kw">,</span> <span class="st">&#39;fmode=0644&#39;</span><span class="kw">]</span></code></pre>
+</section></section>
 <section><section id="creating-base-boxes" class="titleslide slide level1"><h1>Creating base boxes</h1></section><section id="creating-base-boxes-1" class="slide level2">
 <h1>Creating base boxes</h1>
 <p>Sometimes, the available base boxes just aren't good enough...</p>
@@ -1052,7 +879,7 @@ puppet/hiera
 </ul>
 </section><section id="enter-packer" class="slide level2">
 <h1>Enter Packer</h1>
-<p><a href="http://www.packer.io/">http://www.packer.io/</a></p>
+<p><a href="http://www.packer.io/" class="uri">http://www.packer.io/</a></p>
 <blockquote>
 <p>Packer is a tool for creating identical machine images for multiple platforms from a single source configuration.</p>
 </blockquote>
@@ -1071,25 +898,18 @@ puppet/hiera
 <ul>
 <li>e.g. Configure for Vagrant, install Puppet, clean up yum repository, zerodisk (smaller disk images)</li>
 </ul></li>
-<li>Find loads of Packer templates at <a href="https://github.com/misheska/basebox-packer">https://github.com/misheska/basebox-packer</a>
+<li>Find loads of awesome Packer templates at <a href="https://github.com/boxcutter" class="uri">https://github.com/boxcutter</a>
 <ul>
-<li>Cr*p, only for Chef &amp; Salt...</li>
+<li>Ubuntu, Debian, CentOS, Fedora, Windows, ...</li>
 </ul></li>
 </ul>
 </section></section>
-<section><section id="thats-it" class="titleslide slide level1"><h1>That's it!</h1></section><section id="what-i-didnt-cover" class="slide level2">
-<h1>What I didn't cover</h1>
-<ul>
-<li>Provisioning with Chef</li>
-<li>Security (SELinux, firewall)</li>
-<li>Testing</li>
-</ul>
-</section><section id="thank-you" class="slide level2">
+<section><section id="thats-it" class="titleslide slide level1"><h1>That's it!</h1></section><section id="thank-you" class="slide level2">
 <h1>Thank you!</h1>
-<p>Presentation slides: <a href="https://github.com/bertvv/vagrant-presentation">https://github.com/bertvv/vagrant-presentation</a></p>
-<p>Code: <a href="https://github.com/bertvv/vagrant-example">https://github.com/bertvv/vagrant-example</a></p>
+<p>Presentation slides: <a href="https://github.com/bertvv/vagrant-presentation" class="uri">https://github.com/bertvv/vagrant-presentation</a></p>
+<p>Code (not up-to-date): <a href="https://github.com/bertvv/vagrant-example" class="uri">https://github.com/bertvv/vagrant-example</a></p>
 <p>More at:</p>
-<p><a href="https://github.com/bertvv/">https://github.com/bertvv/</a> <a href="https://bitbucket.org/bertvanvreckem/">https://bitbucket.org/bertvanvreckem/</a> <a href="https://www.youtube.com/user/bertvvrhogent/">https://www.youtube.com/user/bertvvrhogent/</a></p>
+<p><a href="https://github.com/bertvv/" class="uri">https://github.com/bertvv/</a> <a href="https://www.youtube.com/user/bertvvrhogent/" class="uri">https://www.youtube.com/user/bertvvrhogent/</a></p>
 <p><a href="https://twitter.com/bertvanvreckem">@bertvanvreckem</a></p>
 <figure>
 <img src="http://i.creativecommons.org/l/by/4.0/88x31.png" alt="CC-BY" /><figcaption>CC-BY</figcaption>
@@ -1097,6 +917,7 @@ puppet/hiera
 </section></section>
     </div>
   </div>
+
 
   <script src="reveal.js/lib/js/head.min.js"></script>
   <script src="reveal.js/js/reveal.min.js"></script>
@@ -1122,5 +943,5 @@ puppet/hiera
 //          { src: 'reveal.js/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
 ]});
     </script>
-  </body>
+    </body>
 </html>
