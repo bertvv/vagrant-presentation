@@ -12,7 +12,6 @@
 * [\@bertvanvreckem](https://twitter.com/bertvanvreckem/)
 * <http://be.linkedin.com/in/bertvanvreckem/>
 * <http://youtube.com/user/bertvvhogent/>
-* <http://hogentsysadmin.wordpress.com/>
 
 ## Have a question/remark? Please interrupt me!
 
