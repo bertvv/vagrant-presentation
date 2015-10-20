@@ -4,7 +4,7 @@ This repository contains the slides of my Vagrant Tutorial, given at [LOADays](h
 
 ## Generating the slide deck
 
-This presentation was created with [pandoc]() by converting [Markdown](https://daringfireball.net/projects/markdown/) source into a [reveal.js](http://lab.hakim.se/reveal-js/#/) slide deck.
+This presentation was created with [pandoc](http://pandoc.org/) by converting [Markdown](https://daringfireball.net/projects/markdown/) source into a [reveal.js](http://lab.hakim.se/reveal-js/#/) slide deck.
 
 To view the presentation, execute `make` in this directory and open `index.html` in a web browser. This wil download reveal.js and install it in the current directory.
 
